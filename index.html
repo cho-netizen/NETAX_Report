@@ -268,16 +268,11 @@
     <div class="viewer-frame-wrap">
       <iframe id="materialFrame" title="자문보고서"></iframe>
     </div>
-    <div class="review-banner">
-      <p>도움이 되셨다면, 후기 한 줄 부탁드립니다 🙏</p>
-      <a href="#" id="reviewLink" target="_blank" rel="noopener">리뷰 남기러 가기</a>
-    </div>
   </div>
 
 <script>
   // ===== 설정 =====
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyg0gDbzPPkpZs2Gnsuw7Qh_qszYy1_8f2Q-SN7Ffreoc3GfHzIZ7B5UXNidT5ale_b/exec';
-  const REVIEW_URL = 'https://search.naver.com/'; // TODO: 실제 리뷰 링크(네이버 플레이스 등)로 교체
 
   // URL에 ?report_id=R001 형태로 넘어오면 자동 채움
   const urlParams = new URLSearchParams(window.location.search);
@@ -322,7 +317,6 @@
   function showResult(data) {
     document.getElementById('customerName').textContent = data.customer_name;
     document.getElementById('materialFrame').src = toEmbedUrl(data.material_link);
-    document.getElementById('reviewLink').href = REVIEW_URL;
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('viewer').style.display = 'flex';
   }
