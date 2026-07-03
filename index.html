@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>자문보고서 열람 | NETAX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #142339;
+    --navy-deep: #0b1626;
+    --cream: #F6F3EC;
+    --gold: #B08D57;
+    --gold-light: #D9BE8F;
+    --text-muted: #6B7280;
+    --error: #B14545;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--navy-deep);
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(176,141,87,0.08), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(176,141,87,0.06), transparent 45%);
+    color: var(--cream);
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--navy);
+    border: 1px solid rgba(176,141,87,0.25);
+    border-radius: 4px;
+    padding: 48px 36px;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-light), var(--gold), var(--gold-light));
+    border-radius: 4px 4px 0 0;
+  }
+
+  .brand {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 13px;
+    letter-spacing: 0.32em;
+    color: var(--gold-light);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 6px;
+    color: var(--cream);
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--gold-light);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .field { margin-bottom: 20px; }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 13px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 3px;
+    color: var(--cream);
+    font-size: 15px;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  input::placeholder { color: rgba(246,243,236,0.32); }
+
+  input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(255,255,255,0.06);
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    background: var(--gold);
+    color: var(--navy-deep);
+    border: none;
+    border-radius: 3px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    letter-spacing: 0.02em;
+  }
+
+  button:hover:not(:disabled) { background: var(--gold-light); }
+  button:active:not(:disabled) { transform: scale(0.99); }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .message {
+    margin-top: 16px;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.6;
+    min-height: 18px;
+  }
+
+  .message.error { color: var(--error); }
+  .message.info { color: var(--text-muted); }
+
+  .footer-note {
+    margin-top: 32px;
+    font-size: 11px;
+    color: rgba(246,243,236,0.28);
+    text-align: center;
+    line-height: 1.7;
+  }
+
+  /* ===== 열람 화면 ===== */
+  .viewer {
+    display: none;
+    width: 100%;
+    max-width: 960px;
+    height: 100dvh;
+    max-height: 900px;
+    flex-direction: column;
+    background: var(--cream);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .viewer-header {
+    background: var(--navy);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .viewer-header .greeting {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    color: var(--cream);
+  }
+
+  .viewer-header .greeting span { color: var(--gold-light); }
+
+  .viewer-header .expiry {
+    font-size: 11px;
+    color: rgba(246,243,236,0.5);
+  }
+
+  .viewer-frame-wrap {
+    flex: 1;
+    background: #fff;
+  }
+
+  .viewer-frame-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  .review-banner {
+    background: var(--navy);
+    padding: 16px 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .review-banner p {
+    font-size: 12.5px;
+    color: rgba(246,243,236,0.75);
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+
+  .review-banner a {
+    display: inline-block;
+    color: var(--navy-deep);
+    background: var(--gold-light);
+    padding: 9px 20px;
+    border-radius: 3px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 36px 24px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 로그인 카드 -->
+  <div class="card" id="loginCard">
+    <div class="brand">NETAX</div>
+    <h1>자문보고서 열람</h1>
+    <p class="subtitle" id="subtitle">발급받으신 열람번호를<br>입력해주세요.</p>
+
+    <form id="idForm">
+      <div class="field">
+        <label for="reportId">열람번호</label>
+        <input type="text" id="reportId" placeholder="예: R001" autocomplete="off" required>
+      </div>
+      <button type="submit" id="idSubmitBtn">확인</button>
+    </form>
+
+    <form id="passwordForm" style="display:none;">
+      <div class="field">
+        <label for="password" id="passwordLabel">비밀번호</label>
+        <input type="password" id="password" placeholder="비밀번호" autocomplete="off" required>
+      </div>
+      <div class="field" id="passwordConfirmField" style="display:none;">
+        <label for="passwordConfirm">비밀번호 확인</label>
+        <input type="password" id="passwordConfirm" placeholder="비밀번호 다시 입력" autocomplete="off">
+      </div>
+      <button type="submit" id="submitBtn">열람하기</button>
+    </form>
+
+    <div class="message" id="message"></div>
+
+    <p class="footer-note">본 페이지는 발급받으신 고객만 열람 가능하며,<br>열람 기간은 발급일로부터 30일간 유효합니다.</p>
+  </div>
+
+  <!-- 열람 화면 -->
+  <div class="viewer" id="viewer">
+    <div class="viewer-header">
+      <div class="greeting"><span id="customerName"></span> 고객님, 자문보고서입니다</div>
+      <div class="expiry">이음세무컨설팅 · NETAX</div>
+    </div>
+    <div class="viewer-frame-wrap">
+      <iframe id="materialFrame" title="자문보고서"></iframe>
+    </div>
+    <div class="review-banner">
+      <p>도움이 되셨다면, 후기 한 줄 부탁드립니다 🙏</p>
+      <a href="#" id="reviewLink" target="_blank" rel="noopener">리뷰 남기러 가기</a>
+    </div>
+  </div>
+
+<script>
+  // ===== 설정 =====
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyg0gDbzPPkpZs2Gnsuw7Qh_qszYy1_8f2Q-SN7Ffreoc3GfHzIZ7B5UXNidT5ale_b/exec';
+  const REVIEW_URL = 'https://search.naver.com/'; // TODO: 실제 리뷰 링크(네이버 플레이스 등)로 교체
+
+  // URL에 ?report_id=R001 형태로 넘어오면 자동 채움
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefilledId = urlParams.get('report_id');
+  if (prefilledId) document.getElementById('reportId').value = prefilledId;
+
+  async function sha256(text) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function toEmbedUrl(link) {
+    // 구글 드라이브/문서/슬라이드 링크는 /preview 형태여야 iframe 임베드가 잘 됩니다.
+    if (link.includes('/edit')) return link.replace(/\/edit.*$/, '/preview');
+    if (link.includes('/view')) return link.replace(/\/view.*$/, '/preview');
+    return link;
+  }
+
+  const idForm = document.getElementById('idForm');
+  const idSubmitBtn = document.getElementById('idSubmitBtn');
+  const passwordForm = document.getElementById('passwordForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const messageEl = document.getElementById('message');
+  const subtitleEl = document.getElementById('subtitle');
+  const passwordLabel = document.getElementById('passwordLabel');
+  const passwordConfirmField = document.getElementById('passwordConfirmField');
+
+  let currentReportId = '';
+  let isNewSetup = false;
+
+  async function callBackend(payload) {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
+  function showResult(data) {
+    document.getElementById('customerName').textContent = data.customer_name;
+    document.getElementById('materialFrame').src = toEmbedUrl(data.material_link);
+    document.getElementById('reviewLink').href = REVIEW_URL;
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('viewer').style.display = 'flex';
+  }
+
+  // ===== 1단계: 열람번호 확인 =====
+  idForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const reportId = document.getElementById('reportId').value.trim();
+    if (!reportId) return;
+
+    idSubmitBtn.disabled = true;
+    idSubmitBtn.textContent = '확인 중...';
+    messageEl.textContent = '';
+    messageEl.className = 'message';
+
+    try {
+      const data = await callBackend({ report_id: reportId });
+
+      if (data.needs_setup) {
+        // 최초 접속 -> 비밀번호 설정 화면
+        currentReportId = reportId;
+        isNewSetup = true;
+        subtitleEl.innerHTML = '처음 접속하셨네요.<br>사용하실 비밀번호를 설정해주세요.';
+        passwordLabel.textContent = '새 비밀번호';
+        passwordConfirmField.style.display = 'block';
+        document.getElementById('passwordConfirm').required = true;
+        idForm.style.display = 'none';
+        passwordForm.style.display = 'block';
+      } else if (data.needs_login) {
+        // 이미 비밀번호 설정됨 -> 로그인 화면
+        currentReportId = reportId;
+        isNewSetup = false;
+        subtitleEl.innerHTML = '설정하신 비밀번호를<br>입력해주세요.';
+        passwordLabel.textContent = '비밀번호';
+        passwordConfirmField.style.display = 'none';
+        document.getElementById('passwordConfirm').required = false;
+        idForm.style.display = 'none';
+        passwordForm.style.display = 'block';
+      } else if (data.success) {
+        // 관리자 우회 등으로 비밀번호 없이 바로 통과되는 경우
+        showResult(data);
+      } else {
+        messageEl.textContent = data.message || '확인할 수 없습니다.';
+        messageEl.className = 'message error';
+      }
+    } catch (err) {
+      messageEl.textContent = '연결에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      messageEl.className = 'message error';
+    } finally {
+      idSubmitBtn.disabled = false;
+      idSubmitBtn.textContent = '확인';
+    }
+  });
+
+  // ===== 2단계: 비밀번호 설정 또는 로그인 =====
+  passwordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('passwordConfirm').value;
+
+    if (isNewSetup && password !== passwordConfirm) {
+      messageEl.textContent = '비밀번호가 서로 일치하지 않습니다.';
+      messageEl.className = 'message error';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '확인 중...';
+    messageEl.textContent = '';
+    messageEl.className = 'message';
+
+    try {
+      const passwordHash = await sha256(password);
+      const data = await callBackend({ report_id: currentReportId, password_hash: passwordHash });
+
+      if (data.success) {
+        showResult(data);
+      } else {
+        messageEl.textContent = data.message || '열람에 실패했습니다.';
+        messageEl.className = 'message error';
+      }
+    } catch (err) {
+      messageEl.textContent = '연결에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      messageEl.className = 'message error';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '열람하기';
+    }
+  });
+</script>
+
+</body>
+</html>
