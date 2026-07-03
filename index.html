@@ -128,7 +128,13 @@
 
   button:hover:not(:disabled) { background: var(--gold-light); }
   button:active:not(:disabled) { transform: scale(0.99); }
-  button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  button:disabled {
+    background: rgba(255,255,255,0.08);
+    color: rgba(246,243,236,0.4);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
 
   .message {
     margin-top: 16px;
@@ -339,7 +345,8 @@
         // 최초 접속 -> 비밀번호 설정 화면
         currentReportId = reportId;
         isNewSetup = true;
-        subtitleEl.innerHTML = '처음 접속하셨네요.<br>사용하실 비밀번호를 설정해주세요.';
+        const name = data.customer_name ? data.customer_name + '님, ' : '';
+        subtitleEl.innerHTML = name + '처음 뵙겠습니다.<br>사용하실 비밀번호를 설정해주세요.';
         passwordLabel.textContent = '새 비밀번호';
         passwordConfirmField.style.display = 'block';
         document.getElementById('passwordConfirm').required = true;
@@ -349,7 +356,8 @@
         // 이미 비밀번호 설정됨 -> 로그인 화면
         currentReportId = reportId;
         isNewSetup = false;
-        subtitleEl.innerHTML = '설정하신 비밀번호를<br>입력해주세요.';
+        const name = data.customer_name ? data.customer_name + '님, ' : '';
+        subtitleEl.innerHTML = name + '다시 오셨네요.<br>설정하신 비밀번호를 입력해주세요.';
         passwordLabel.textContent = '비밀번호';
         passwordConfirmField.style.display = 'none';
         document.getElementById('passwordConfirm').required = false;
