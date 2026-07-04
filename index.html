@@ -72,11 +72,21 @@
 
   h1 {
     font-family: 'Noto Serif KR', serif;
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 27px;
+    font-weight: 700;
     text-align: center;
-    margin-bottom: 32px;
+    letter-spacing: 0.02em;
+    margin-bottom: 14px;
     color: var(--cream);
+  }
+
+  h1::after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 2px;
+    background: var(--gold);
+    margin: 14px auto 0;
   }
 
   .subtitle {
@@ -125,6 +135,24 @@
   }
 
   .field { margin-bottom: 20px; }
+
+  .field-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .field-row input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .field-row button {
+    width: auto;
+    white-space: nowrap;
+    padding: 0 22px;
+    margin-top: 0;
+  }
 
   input[type="text"],
   input[type="password"] {
@@ -175,11 +203,11 @@
   }
 
   .message {
-    margin-top: 16px;
+    margin-top: 8px;
     font-size: 13px;
     text-align: center;
     line-height: 1.6;
-    min-height: 18px;
+    min-height: 0;
   }
 
   .message.error { color: var(--error); }
@@ -266,8 +294,8 @@
   }
 
   .footer-brand {
-    margin-top: 24px;
-    padding-top: 20px;
+    margin-top: 16px;
+    padding-top: 14px;
     border-top: 1px solid rgba(255,255,255,0.08);
     display: flex;
     align-items: center;
@@ -323,10 +351,10 @@
     <p class="subtitle" id="subtitle" style="display:none;"></p>
 
     <form id="idForm">
-      <div class="field">
+      <div class="field-row">
         <input type="text" id="reportId" placeholder="발급받으신 열람번호 입력 (예: R001)" aria-label="열람번호" autocomplete="off" required>
+        <button type="submit" id="idSubmitBtn">확인</button>
       </div>
-      <button type="submit" id="idSubmitBtn">확인</button>
     </form>
 
     <form id="passwordForm" style="display:none;">
