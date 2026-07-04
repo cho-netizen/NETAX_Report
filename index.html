@@ -55,6 +55,15 @@
     border-radius: 4px 4px 0 0;
   }
 
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-light), var(--gold), var(--gold-light));
+    border-radius: 0 0 4px 4px;
+  }
+
   .brand img {
     height: 22px;
     display: block;
@@ -72,7 +81,7 @@
 
   .subtitle {
     font-size: 13px;
-    color: var(--text-muted);
+    color: rgba(246,243,236,0.72);
     text-align: center;
     margin-bottom: 20px;
     line-height: 1.6;
@@ -151,7 +160,7 @@
   .footer-note {
     margin-top: 32px;
     font-size: 11px;
-    color: rgba(246,243,236,0.28);
+    color: rgba(246,243,236,0.5);
     text-align: center;
     line-height: 1.7;
   }
@@ -229,7 +238,19 @@
   }
 
   @media (max-width: 480px) {
-    .card { padding: 36px 24px; }
+    body { padding: 0; align-items: stretch; }
+    .card {
+      max-width: 100%;
+      min-height: 100dvh;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 36px 24px;
+    }
+    .card::before, .card::after { border-radius: 0; }
   }
 </style>
 </head>
@@ -238,7 +259,7 @@
   <!-- 로그인 카드 -->
   <div class="card" id="loginCard">
     <div class="brand"><img src="netax-wordmark.png" alt="NETAX"></div>
-    <h1>자문보고서 열람</h1>
+    <h1>Consulting Report</h1>
     <p class="subtitle" id="subtitle">발급받으신 열람번호를<br>입력해주세요.</p>
 
     <form id="idForm">
