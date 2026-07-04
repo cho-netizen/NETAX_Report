@@ -215,6 +215,41 @@
     color: var(--cream);
   }
 
+  .viewer-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #fullscreenBtn {
+    width: auto;
+    padding: 6px 12px;
+    margin-top: 0;
+    font-size: 11px;
+    background: rgba(255,255,255,0.1);
+    color: var(--cream);
+    font-weight: 500;
+  }
+
+  #fullscreenBtn:hover { background: rgba(255,255,255,0.18); }
+
+  /* 폰을 가로로 눕혔을 때: 헤더 최소화해서 보고서 공간 최대 확보 */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .viewer-header {
+      padding: 6px 14px;
+    }
+    .viewer-header .greeting {
+      font-size: 12px;
+    }
+    .viewer-header .expiry {
+      display: none;
+    }
+    #fullscreenBtn {
+      padding: 4px 10px;
+      font-size: 10px;
+    }
+  }
+
   .viewer-frame-wrap {
     flex: 1;
     background: #fff;
@@ -311,9 +346,12 @@
 
   <!-- 열람 화면 -->
   <div class="viewer" id="viewer">
-    <div class="viewer-header">
+    <div class="viewer-header" id="viewerHeader">
       <div class="greeting"><span id="customerName"></span> 고객님, 자문보고서입니다</div>
-      <div class="expiry">이음세무컨설팅 · NETAX</div>
+      <div class="viewer-header-right">
+        <div class="expiry">이음세무컨설팅 · NETAX</div>
+        <button type="button" id="fullscreenBtn" title="전체화면으로 보기">⛶ 전체화면</button>
+      </div>
     </div>
     <div class="viewer-frame-wrap">
       <iframe id="materialFrame" title="자문보고서"></iframe>
@@ -327,6 +365,7 @@
   // URL에 ?report_id=R001 형태로 넘어오면 자동 채움
   const urlParams = new URLSearchParams(window.location.search);
   const prefilledId = urlParams.get('report_id');
+  const adminCodeParam = urlParams.get('admin');
   if (prefilledId) document.getElementById('reportId').value = prefilledId;
 
   async function sha256(text) {
@@ -366,9 +405,37 @@
 
   function showResult(data) {
     document.getElementById('customerName').textContent = data.customer_name;
-    document.getElementById('materialFrame').src = toEmbedUrl(data.material_link);
+    const frame = document.getElementById('materialFrame');
+    if (data.material_link.startsWith('srcdoc:')) {
+      frame.removeAttribute('src');
+      frame.srcdoc = data.material_link.slice(7);
+    } else {
+      frame.removeAttribute('srcdoc');
+      frame.src = toEmbedUrl(data.material_link);
+    }
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('viewer').style.display = 'flex';
+  }
+
+  document.getElementById('fullscreenBtn').addEventListener('click', () => {
+    const viewer = document.getElementById('viewer');
+    if (!document.fullscreenElement) {
+      (viewer.requestFullscreen || viewer.webkitRequestFullscreen)?.call(viewer);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+    }
+  });
+
+  // ===== 관리자 우회: ?report_id=R001&admin=관리자코드 로 접속하면 자동 진입 =====
+  if (prefilledId && adminCodeParam) {
+    callBackend({ report_id: prefilledId, admin_code: adminCodeParam }).then(data => {
+      if (data.success) {
+        showResult(data);
+      } else {
+        messageEl.textContent = data.message || '관리자 우회 실패';
+        messageEl.className = 'message error';
+      }
+    });
   }
 
   // ===== 1단계: 열람번호 확인 =====
