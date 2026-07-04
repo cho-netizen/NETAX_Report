@@ -83,20 +83,6 @@
     margin: 22px auto 0;
   }
 
-  .subtitle {
-    font-size: 13px;
-    color: var(--cream);
-    text-align: center;
-    margin-bottom: 20px;
-    line-height: 1.6;
-  }
-
-  .subtitle .highlight {
-    font-family: 'Noto Serif KR', serif;
-    color: var(--gold-light);
-    font-weight: 600;
-  }
-
   .footer-highlight .highlight-strong {
     font-family: 'Nanum Myeongjo', serif;
     color: var(--gold-light);
@@ -310,8 +296,6 @@
 
     <p class="footer-highlight">이 <span class="highlight-strong">자문용역 보고서</span> 는<br>고객님을 위해 <span class="highlight">맞춤형</span>으로<br>종이문서가 아닌 <span class="highlight">전용 페이지</span>로<br>특별히 제작하여<br>드리는 문서입니다.<br>스마트기기로 언제 어디서든<br>열람하실 수 있습니다.<br>열람가능 기간은<br>발급일로부터 30일입니다.</p>
 
-    <p class="subtitle" id="subtitle" style="display:none;"></p>
-
     <form id="idForm">
       <div class="field-row">
         <input type="text" id="reportId" placeholder="열람번호 입력" aria-label="열람번호" autocomplete="off" required>
@@ -320,15 +304,13 @@
     </form>
 
     <form id="passwordForm" style="display:none;">
-      <div class="field">
-        <label for="password" id="passwordLabel">비밀번호</label>
-        <input type="password" id="password" placeholder="비밀번호" autocomplete="off" required>
+      <div class="field-row" id="passwordRow">
+        <input type="password" id="password" placeholder="비밀번호" aria-label="비밀번호" autocomplete="off" required>
+        <button type="submit" id="submitBtn">열람하기</button>
       </div>
-      <div class="field" id="passwordConfirmField" style="display:none;">
-        <label for="passwordConfirm">비밀번호 확인</label>
-        <input type="password" id="passwordConfirm" placeholder="비밀번호 다시 입력" autocomplete="off">
+      <div class="field-row" id="passwordConfirmField" style="display:none;">
+        <input type="password" id="passwordConfirm" placeholder="비밀번호 확인" aria-label="비밀번호 확인" autocomplete="off">
       </div>
-      <button type="submit" id="submitBtn">열람하기</button>
     </form>
 
     <div class="message" id="message"></div>
@@ -380,8 +362,8 @@
   const passwordForm = document.getElementById('passwordForm');
   const submitBtn = document.getElementById('submitBtn');
   const messageEl = document.getElementById('message');
-  const subtitleEl = document.getElementById('subtitle');
-  const passwordLabel = document.getElementById('passwordLabel');
+  const passwordInput = document.getElementById('password');
+  const passwordRow = document.getElementById('passwordRow');
   const passwordConfirmField = document.getElementById('passwordConfirmField');
 
   let currentReportId = '';
@@ -420,24 +402,20 @@
         // 최초 접속 -> 비밀번호 설정 화면
         currentReportId = reportId;
         isNewSetup = true;
-        const name = data.customer_name ? data.customer_name + '님, ' : '';
-        subtitleEl.innerHTML = name + '처음 뵙겠습니다.<br>사용하실 비밀번호를 설정해주세요.';
-        subtitleEl.style.display = 'block';
-        passwordLabel.textContent = '새 비밀번호';
-        passwordConfirmField.style.display = 'block';
+        passwordInput.placeholder = '새 비밀번호 설정';
+        passwordConfirmField.style.display = 'flex';
         document.getElementById('passwordConfirm').required = true;
+        passwordConfirmField.appendChild(submitBtn);
         idForm.style.display = 'none';
         passwordForm.style.display = 'block';
       } else if (data.needs_login) {
         // 이미 비밀번호 설정됨 -> 로그인 화면
         currentReportId = reportId;
         isNewSetup = false;
-        const name = data.customer_name ? data.customer_name + '님, ' : '';
-        subtitleEl.innerHTML = name + '다시 오셨네요.<br>설정하신 비밀번호를 입력해주세요.';
-        subtitleEl.style.display = 'block';
-        passwordLabel.textContent = '비밀번호';
+        passwordInput.placeholder = '비밀번호 입력';
         passwordConfirmField.style.display = 'none';
         document.getElementById('passwordConfirm').required = false;
+        passwordRow.appendChild(submitBtn);
         idForm.style.display = 'none';
         passwordForm.style.display = 'block';
       } else if (data.success) {
