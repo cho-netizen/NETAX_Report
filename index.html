@@ -212,9 +212,9 @@
 
   .viewer-header .greeting span { color: var(--gold-light); }
 
-  .viewer-header .expiry {
-    font-size: 11px;
-    color: var(--cream);
+  .expiry-logo {
+    height: 16px;
+    opacity: 0.9;
   }
 
   .viewer-header-right {
@@ -242,7 +242,7 @@
       justify-content: flex-end;
     }
     .viewer-header .greeting,
-    .viewer-header .expiry {
+    .expiry-logo {
       display: none;
     }
     #fullscreenBtn {
@@ -290,6 +290,9 @@
     margin: 0 0 8px;
     padding-bottom: 14px;
     border-bottom: 3px solid var(--gold);
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: keep-all;
   }
 
   .md-content h1::after { display: none; }
@@ -337,6 +340,7 @@
     border-collapse: collapse;
     margin: 0;
     font-size: 14px;
+    table-layout: fixed;
   }
 
   .md-content th {
@@ -347,8 +351,7 @@
     font-weight: 600;
   }
 
-  .md-content td:first-child,
-  .md-content th:first-child {
+  .md-content td:first-child {
     letter-spacing: -0.06em;
     transform: scaleX(0.92);
     transform-origin: left;
@@ -472,9 +475,9 @@
   <!-- 열람 화면 -->
   <div class="viewer" id="viewer">
     <div class="viewer-header" id="viewerHeader">
-      <div class="greeting"><span id="customerName"></span> 고객님, 자문보고서입니다</div>
+      <div class="greeting"><span id="customerName"></span> 고객님, 자문용역보고서</div>
       <div class="viewer-header-right">
-        <div class="expiry">이음세무컨설팅 · NETAX</div>
+        <img src="netax-wordmark.png" alt="NETAX" class="expiry-logo">
         <button type="button" id="fullscreenBtn" title="전체화면으로 보기">⛶ 전체화면</button>
       </div>
     </div>
