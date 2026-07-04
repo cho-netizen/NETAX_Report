@@ -75,7 +75,7 @@
     font-size: 22px;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 6px;
+    margin-bottom: 32px;
     color: var(--cream);
   }
 
@@ -88,6 +88,20 @@
   }
 
   .subtitle .highlight {
+    font-family: 'Noto Serif KR', serif;
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+
+  .footer-highlight {
+    margin-top: 32px;
+    font-size: 13px;
+    color: rgba(246,243,236,0.72);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .footer-highlight .highlight {
     font-family: 'Noto Serif KR', serif;
     color: var(--gold-light);
     font-weight: 600;
@@ -164,7 +178,7 @@
   .message.info { color: var(--text-muted); }
 
   .footer-note {
-    margin-top: 32px;
+    margin-top: 14px;
     font-size: 11px;
     color: rgba(246,243,236,0.5);
     text-align: center;
@@ -266,7 +280,7 @@
   <div class="card" id="loginCard">
     <div class="brand"><img src="netax-wordmark.png" alt="NETAX"></div>
     <h1>Consulting Report</h1>
-    <p class="subtitle" id="subtitle">이 <span class="highlight">자문용역 보고서</span>는<br>고객님만을 위해 작성된 전용 자료입니다.</p>
+    <p class="subtitle" id="subtitle" style="display:none;"></p>
 
     <form id="idForm">
       <div class="field">
@@ -289,7 +303,7 @@
 
     <div class="message" id="message"></div>
 
-    <p class="footer-note">본 페이지는 발급받으신 고객만 열람 가능하며,<br>열람 기간은 발급일로부터 30일간 유효합니다.</p>
+    <p class="footer-highlight">이 <span class="highlight">자문용역 보고서</span>는<br>고객님만 위하여 작성된 전용 보고서로서<br>열람가능 기간은 발급일로부터 30일입니다.</p>
   </div>
 
   <!-- 열람 화면 -->
