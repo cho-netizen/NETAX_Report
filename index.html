@@ -234,20 +234,19 @@
 
   #fullscreenBtn:hover { background: rgba(255,255,255,0.18); }
 
-  /* 폰을 가로로 눕혔을 때: 헤더 최소화해서 보고서 공간 최대 확보 */
-  @media (orientation: landscape) and (max-height: 500px) {
+  /* 폰 화면: 헤더에서 전체화면 버튼만 남기고 나머지는 숨김 */
+  @media (max-width: 480px), (max-height: 500px) {
     .viewer-header {
-      padding: 6px 14px;
+      padding: 8px 14px;
+      justify-content: flex-end;
     }
-    .viewer-header .greeting {
-      font-size: 12px;
-    }
+    .viewer-header .greeting,
     .viewer-header .expiry {
       display: none;
     }
     #fullscreenBtn {
-      padding: 4px 10px;
-      font-size: 10px;
+      padding: 6px 14px;
+      font-size: 12px;
     }
   }
 
