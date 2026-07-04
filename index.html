@@ -87,6 +87,12 @@
     line-height: 1.6;
   }
 
+  .subtitle .highlight {
+    font-family: 'Noto Serif KR', serif;
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+
   label {
     display: block;
     font-size: 12px;
@@ -260,11 +266,11 @@
   <div class="card" id="loginCard">
     <div class="brand"><img src="netax-wordmark.png" alt="NETAX"></div>
     <h1>Consulting Report</h1>
-    <p class="subtitle" id="subtitle">발급받으신 열람번호를<br>입력해주세요.</p>
+    <p class="subtitle" id="subtitle">이 <span class="highlight">자문용역 보고서</span>는<br>고객님만을 위해 작성된 전용 자료입니다.</p>
 
     <form id="idForm">
       <div class="field">
-        <input type="text" id="reportId" placeholder="예: R001" aria-label="열람번호" autocomplete="off" required>
+        <input type="text" id="reportId" placeholder="발급받으신 열람번호 입력 (예: R001)" aria-label="열람번호" autocomplete="off" required>
       </div>
       <button type="submit" id="idSubmitBtn">확인</button>
     </form>
@@ -368,6 +374,7 @@
         isNewSetup = true;
         const name = data.customer_name ? data.customer_name + '님, ' : '';
         subtitleEl.innerHTML = name + '처음 뵙겠습니다.<br>사용하실 비밀번호를 설정해주세요.';
+        subtitleEl.style.display = 'block';
         passwordLabel.textContent = '새 비밀번호';
         passwordConfirmField.style.display = 'block';
         document.getElementById('passwordConfirm').required = true;
@@ -379,6 +386,7 @@
         isNewSetup = false;
         const name = data.customer_name ? data.customer_name + '님, ' : '';
         subtitleEl.innerHTML = name + '다시 오셨네요.<br>설정하신 비밀번호를 입력해주세요.';
+        subtitleEl.style.display = 'block';
         passwordLabel.textContent = '비밀번호';
         passwordConfirmField.style.display = 'none';
         document.getElementById('passwordConfirm').required = false;
