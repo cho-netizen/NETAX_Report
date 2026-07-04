@@ -21,6 +21,7 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; }
 
   body {
     font-family: 'Noto Sans KR', sans-serif;
@@ -329,6 +330,14 @@
     border-collapse: collapse;
     margin: 8px 0 24px;
     font-size: 14px;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .md-content thead, .md-content tbody, .md-content tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
   }
 
   .md-content th {
@@ -423,7 +432,7 @@
       padding: 36px 24px 16px;
     }
     .card::before, .card::after { border-radius: 0; }
-    h1 { font-size: 21px; white-space: nowrap; }
+    #loginCard h1 { font-size: 21px; }
   }
 </style>
 </head>
