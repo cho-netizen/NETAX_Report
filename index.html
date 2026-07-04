@@ -446,7 +446,7 @@
 
     <form id="idForm">
       <div class="field-row">
-        <input type="text" id="reportId" placeholder="열람번호 입력" aria-label="열람번호" autocomplete="off" required>
+        <input type="text" id="reportId" placeholder="열람번호 입력" aria-label="열람번호" autocomplete="off" style="text-transform:uppercase;" required>
         <button type="submit" id="idSubmitBtn">확인</button>
       </div>
     </form>
@@ -581,7 +581,7 @@
   // ===== 1단계: 열람번호 확인 =====
   idForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const reportId = document.getElementById('reportId').value.trim();
+    const reportId = document.getElementById('reportId').value.trim().toUpperCase();
     if (!reportId) return;
 
     idSubmitBtn.disabled = true;
