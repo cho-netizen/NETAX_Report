@@ -9,6 +9,7 @@
 <title>자문보고서 열람 | NETAX</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <style>
   :root {
     --navy: #0D1B3D;
@@ -253,6 +254,99 @@
   .viewer-frame-wrap {
     flex: 1;
     background: #fff;
+    overflow-y: auto;
+  }
+
+  .md-content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: #22303F;
+    line-height: 1.8;
+    font-size: 15.5px;
+  }
+
+  .md-content h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: left;
+    letter-spacing: normal;
+    margin: 0 0 8px;
+    padding-bottom: 14px;
+    border-bottom: 3px solid var(--gold);
+  }
+
+  .md-content h1::after { display: none; }
+
+  .md-content h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 34px 0 12px;
+    padding-left: 12px;
+    border-left: 4px solid var(--gold);
+  }
+
+  .md-content h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 24px 0 10px;
+  }
+
+  .md-content p { margin: 0 0 14px; }
+
+  .md-content strong {
+    color: var(--navy);
+    background: linear-gradient(transparent 60%, rgba(200,162,68,0.28) 60%);
+    font-weight: 700;
+  }
+
+  .md-content ul, .md-content ol {
+    margin: 0 0 14px;
+    padding-left: 22px;
+  }
+
+  .md-content li { margin-bottom: 6px; }
+
+  .md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 24px;
+    font-size: 14px;
+  }
+
+  .md-content th {
+    background: var(--navy);
+    color: var(--cream);
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  .md-content td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #E4E0D8;
+  }
+
+  .md-content tr:nth-child(even) td { background: #FAF8F3; }
+
+  .md-content blockquote {
+    margin: 0 0 18px;
+    padding: 12px 16px;
+    background: #F5F1E8;
+    border-left: 4px solid var(--gold);
+    color: #4A4A4A;
+  }
+
+  .md-content hr {
+    border: none;
+    border-top: 1px solid #E4E0D8;
+    margin: 28px 0;
   }
 
   .viewer-frame-wrap iframe {
@@ -354,7 +448,8 @@
       </div>
     </div>
     <div class="viewer-frame-wrap">
-      <iframe id="materialFrame" title="자문보고서"></iframe>
+      <iframe id="materialFrame" title="자문보고서" style="display:none;"></iframe>
+      <div id="materialContent" class="md-content" style="display:none;"></div>
     </div>
   </div>
 
@@ -406,13 +501,26 @@
   function showResult(data) {
     document.getElementById('customerName').textContent = data.customer_name;
     const frame = document.getElementById('materialFrame');
-    if (data.material_link.startsWith('srcdoc:')) {
-      frame.removeAttribute('src');
-      frame.srcdoc = data.material_link.slice(7);
+    const contentEl = document.getElementById('materialContent');
+
+    if (data.report_content) {
+      // 마크다운 원문을 브랜드 스타일로 직접 렌더링
+      frame.style.display = 'none';
+      contentEl.style.display = 'block';
+      contentEl.innerHTML = marked.parse(data.report_content);
     } else {
-      frame.removeAttribute('srcdoc');
-      frame.src = toEmbedUrl(data.material_link);
+      // 기존 방식: 구글 드라이브 파일을 iframe으로 표시
+      contentEl.style.display = 'none';
+      frame.style.display = 'block';
+      if (data.material_link.startsWith('srcdoc:')) {
+        frame.removeAttribute('src');
+        frame.srcdoc = data.material_link.slice(7);
+      } else {
+        frame.removeAttribute('srcdoc');
+        frame.src = toEmbedUrl(data.material_link);
+      }
     }
+
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('viewer').style.display = 'flex';
   }
