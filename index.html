@@ -101,7 +101,8 @@
   }
 
   .footer-highlight {
-    margin-top: 32px;
+    margin-top: 0;
+    margin-bottom: 32px;
     font-size: 15px;
     color: rgba(246,243,236,0.8);
     text-align: center;
@@ -264,6 +265,34 @@
     text-decoration: none;
   }
 
+  .footer-brand {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .footer-logo {
+    height: 16px;
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+
+  .footer-brand-text {
+    font-size: 11px;
+    color: rgba(246,243,236,0.5);
+    text-align: left;
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .sig-separator { display: none; }
+
   @media (max-width: 480px) {
     body { padding: 0; align-items: stretch; }
     .card {
@@ -278,6 +307,8 @@
       padding: 36px 24px;
     }
     .card::before, .card::after { border-radius: 0; }
+    .sig-separator { display: inline; }
+    .sig-break { display: none; }
   }
 </style>
 </head>
@@ -285,8 +316,10 @@
 
   <!-- 로그인 카드 -->
   <div class="card" id="loginCard">
-    <div class="brand"><img src="netax-wordmark.png" alt="NETAX"></div>
     <h1>Consulting Report</h1>
+
+    <p class="footer-highlight">이 <span class="highlight-strong">자문용역 보고서</span>는<br>고객님만을 위해<br><span class="highlight">맞춤형</span>으로 작성하여<br>제공하여 드리는 문서입니다.<br>종이문서가 아니라<br>스마트폰에서도 바로 열람 가능한<br>고객님만의 <span class="highlight">전용 페이지</span>로<br>특별히 제작되었습니다.<br>열람 가능 기간은<br>발급일로부터 30일 입니다.</p>
+
     <p class="subtitle" id="subtitle" style="display:none;"></p>
 
     <form id="idForm">
@@ -310,7 +343,10 @@
 
     <div class="message" id="message"></div>
 
-    <p class="footer-highlight">이 <span class="highlight-strong">자문용역 보고서</span>는<br>고객님만을 위해<br><span class="highlight">맞춤형</span>으로 작성하여<br>제공하여 드리는 문서입니다.<br>종이문서가 아니라<br>스마트폰에서도 바로 열람 가능한<br>고객님만의 <span class="highlight">전용 페이지</span>로<br>특별히 제작되었습니다.<br>열람 가능 기간은<br>발급일로부터 30일 입니다.</p>
+    <div class="footer-brand">
+      <img src="netax-wordmark.png" alt="NETAX" class="footer-logo">
+      <div class="footer-brand-text">이음세무컨설팅<span class="sig-separator"> · </span><br class="sig-break">조종호 세무사</div>
+    </div>
   </div>
 
   <!-- 열람 화면 -->
