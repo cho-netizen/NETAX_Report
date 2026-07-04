@@ -287,8 +287,9 @@
     font-weight: 700;
     color: var(--navy);
     margin: 34px 0 12px;
-    padding-left: 12px;
-    border-left: 4px solid var(--gold);
+    padding: 10px 14px;
+    background: linear-gradient(90deg, rgba(200,162,68,0.14), rgba(200,162,68,0));
+    border-bottom: 2px solid var(--gold);
   }
 
   .md-content h3 {
@@ -321,11 +322,18 @@
   }
 
   .md-content th {
-    background: var(--navy);
+    background: #2A3F63;
     color: var(--cream);
     padding: 10px 12px;
     text-align: left;
     font-weight: 600;
+  }
+
+  .md-content td:first-child,
+  .md-content th:first-child {
+    letter-spacing: -0.06em;
+    transform: scaleX(0.92);
+    transform-origin: left;
   }
 
   .md-content td {
@@ -339,8 +347,13 @@
     margin: 0 0 18px;
     padding: 12px 16px;
     background: #F5F1E8;
-    border-left: 4px solid var(--gold);
     color: #4A4A4A;
+  }
+
+  .md-content blockquote p {
+    margin: 0;
+    padding-left: 1.6em;
+    text-indent: -1.6em;
   }
 
   .md-content hr {
