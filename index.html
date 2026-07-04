@@ -276,6 +276,8 @@
     color: #22303F;
     line-height: 1.8;
     font-size: 15.5px;
+    overflow-wrap: break-word;
+    word-break: keep-all;
   }
 
   .md-content h1 {
@@ -325,19 +327,16 @@
 
   .md-content li { margin-bottom: 6px; }
 
+  .md-content .table-scroll {
+    overflow-x: auto;
+    margin: 8px 0 24px;
+  }
+
   .md-content table {
     width: 100%;
     border-collapse: collapse;
-    margin: 8px 0 24px;
+    margin: 0;
     font-size: 14px;
-    display: block;
-    overflow-x: auto;
-  }
-
-  .md-content thead, .md-content tbody, .md-content tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
   }
 
   .md-content th {
@@ -539,7 +538,11 @@
       // 마크다운 원문을 브랜드 스타일로 직접 렌더링
       frame.style.display = 'none';
       contentEl.style.display = 'block';
-      contentEl.innerHTML = marked.parse(data.report_content);
+      let renderedHtml = marked.parse(data.report_content);
+      renderedHtml = renderedHtml
+        .replace(/<table>/g, '<div class="table-scroll"><table>')
+        .replace(/<\/table>/g, '</table></div>');
+      contentEl.innerHTML = renderedHtml;
     } else {
       // 기존 방식: 구글 드라이브 파일을 iframe으로 표시
       contentEl.style.display = 'none';
