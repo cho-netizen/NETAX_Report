@@ -1108,10 +1108,53 @@
     });
   }
 
+  // ===== 한글 자판으로 잘못 입력된 열람번호를 영문으로 역변환 =====
+  // 두벌식 자판 기준: 한글 입력 시 눌렸던 실제 키(영문)를 복원
+  const HANGUL_TO_QWERTY = {
+    'ㅂ':'q','ㅈ':'w','ㄷ':'e','ㄱ':'r','ㅅ':'t','ㅛ':'y','ㅕ':'u','ㅑ':'i','ㅐ':'o','ㅔ':'p',
+    'ㅁ':'a','ㄴ':'s','ㅇ':'d','ㄹ':'f','ㅎ':'g','ㅗ':'h','ㅓ':'j','ㅏ':'k','ㅣ':'l',
+    'ㅋ':'z','ㅌ':'x','ㅊ':'c','ㅍ':'v','ㅠ':'b','ㅜ':'n','ㅡ':'m',
+    'ㅃ':'Q','ㅉ':'W','ㄸ':'E','ㄲ':'R','ㅆ':'T','ㅒ':'O','ㅖ':'P',
+  };
+
+  function decomposeHangul(ch) {
+    const code = ch.charCodeAt(0);
+    if (code < 0xAC00 || code > 0xD7A3) return null; // 완성형 한글 범위 밖
+    const CHO  = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+    const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    const idx = code - 0xAC00;
+    const cho  = CHO[Math.floor(idx / (21 * 28))];
+    const jung = JUNG[Math.floor((idx % (21 * 28)) / 28)];
+    const jong = JONG[idx % 28];
+    return { cho, jung, jong };
+  }
+
+  // 열람번호는 영문·숫자 조합이 원칙이므로, 완성형 한글이 섞여 있으면
+  // 두벌식 자판 매핑으로 되돌려 원래 눌렀을 영문 키 조합으로 복원한다.
+  function normalizeReportId(raw) {
+    let result = '';
+    for (const ch of raw) {
+      const parts = decomposeHangul(ch);
+      if (!parts) {
+        result += ch; // 이미 영문/숫자면 그대로
+        continue;
+      }
+      // 초성 → 대응 영문 키
+      if (HANGUL_TO_QWERTY[parts.cho]) result += HANGUL_TO_QWERTY[parts.cho];
+      // 중성 → 대응 영문 키 (조합 모음은 매핑표에 없으면 원문자 유지)
+      if (HANGUL_TO_QWERTY[parts.jung]) result += HANGUL_TO_QWERTY[parts.jung];
+      // 종성이 있으면 → 대응 영문 키
+      if (parts.jong && HANGUL_TO_QWERTY[parts.jong]) result += HANGUL_TO_QWERTY[parts.jong];
+    }
+    return result;
+  }
+
   // ===== 1단계: 열람번호 확인 =====
   idForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const reportId = document.getElementById('reportId').value.trim().toUpperCase();
+    const rawInput = document.getElementById('reportId').value.trim();
+    const reportId = normalizeReportId(rawInput).toUpperCase();
     if (!reportId) return;
 
     idSubmitBtn.disabled = true;
