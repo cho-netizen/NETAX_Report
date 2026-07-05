@@ -1135,16 +1135,19 @@
   function normalizeReportId(raw) {
     let result = '';
     for (const ch of raw) {
+      // 조합되지 않은 낱자(자음/모음)가 그대로 들어온 경우 — 바로 매핑
+      if (HANGUL_TO_QWERTY[ch]) {
+        result += HANGUL_TO_QWERTY[ch];
+        continue;
+      }
+      // 완성형 한글(가~힣)인 경우 — 초성·중성·종성으로 분해 후 매핑
       const parts = decomposeHangul(ch);
       if (!parts) {
         result += ch; // 이미 영문/숫자면 그대로
         continue;
       }
-      // 초성 → 대응 영문 키
       if (HANGUL_TO_QWERTY[parts.cho]) result += HANGUL_TO_QWERTY[parts.cho];
-      // 중성 → 대응 영문 키 (조합 모음은 매핑표에 없으면 원문자 유지)
       if (HANGUL_TO_QWERTY[parts.jung]) result += HANGUL_TO_QWERTY[parts.jung];
-      // 종성이 있으면 → 대응 영문 키
       if (parts.jong && HANGUL_TO_QWERTY[parts.jong]) result += HANGUL_TO_QWERTY[parts.jong];
     }
     return result;
