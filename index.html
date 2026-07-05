@@ -621,6 +621,18 @@
     margin: 0 auto;
   }
 
+  /* Mermaid 노드 내부 텍스트 행간·크기 축소 — 박스 밖으로 삐져나오는 문제 방지 */
+  .mermaid-diagram svg .nodeLabel,
+  .mermaid-diagram svg .edgeLabel,
+  .mermaid-diagram svg foreignObject div,
+  .mermaid-diagram svg foreignObject span {
+    font-size: 12.5px !important;
+    line-height: 1.25 !important;
+  }
+  .mermaid-diagram svg .label {
+    font-size: 12.5px !important;
+  }
+
   .md-content hr {
     border: none;
     border-top: 1px solid #E4E0D8;
@@ -909,8 +921,16 @@
         lineColor: '#C8A244',
         secondaryColor: '#2A3F63',
         tertiaryColor: '#F5F1E8',
-        fontFamily: "'Noto Sans KR', sans-serif"
-      }
+        fontFamily: "'Noto Sans KR', sans-serif",
+        fontSize: '13px',
+      },
+      flowchart: {
+        htmlLabels: true,
+        nodeSpacing: 24,
+        rankSpacing: 36,
+        padding: 8,
+        curve: 'basis',
+      },
     });
   }
 
