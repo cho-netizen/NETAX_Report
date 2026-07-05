@@ -433,6 +433,20 @@
     .md-content .katex-display > .katex {
       white-space: normal;
     }
+    /* 모바일 본문 행간·폰트 축소 — 넓은 행간으로 인한 스크롤 과다 방지 */
+    .md-content {
+      font-size: 14.5px;
+      line-height: 1.55;
+    }
+    .md-content p,
+    .md-content li,
+    .md-content td,
+    .md-content blockquote {
+      line-height: 1.5;
+    }
+    .md-content h2 {
+      line-height: 1.4;
+    }
   }
 
   /* ===== Chart.js 차트 ===== */
