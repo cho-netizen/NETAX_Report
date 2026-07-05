@@ -415,6 +415,26 @@
 
   /* 금액 열 정렬: 추후 별도 지시에 따라 적용 */
 
+  /* ===== KaTeX 수식 — 모바일 화면 너비 초과 시 가로 스크롤 처리 ===== */
+  .md-content .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 2px 8px;
+    margin: 8px 0 16px;
+    max-width: 100%;
+  }
+  .md-content .katex {
+    font-size: 1em;
+  }
+  @media (max-width: 480px) {
+    .md-content .katex-display {
+      font-size: 0.85em;
+    }
+    .md-content .katex-display > .katex {
+      white-space: normal;
+    }
+  }
+
   /* ===== Chart.js 차트 ===== */
   .chart-wrapper {
     margin: 12px 0 24px;
