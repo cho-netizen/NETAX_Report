@@ -367,8 +367,8 @@
   }
 
   .md-content th {
-    background: #3D5378;
-    color: #F0EDE4;
+    background: #4A6080;
+    color: #F5F2EC;
     padding: 10px 12px;
     text-align: left;
     font-weight: 600;
@@ -386,7 +386,7 @@
   .md-content th:only-child { text-align: center; }
 
   .md-content blockquote {
-    margin: 0 0 18px;
+    margin: 0 0 4px;
     padding: 12px 16px;
     background: #F5F1E8;
     color: #4A4A4A;
@@ -402,14 +402,7 @@
   .md-content p { text-indent: 0; padding-left: 0; }
   .md-content td { text-indent: 0; padding-left: 12px; }
 
-  /* 5번: 금액 열 우정렬 — "원" 자 수직 기준, 가장 긴 데이터 우측 글자에 맞춤 */
-  .md-content td:last-child:not(:first-child) {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
-    white-space: nowrap;
-    padding-right: 16px;
-  }
+  /* 금액 열 정렬: 추후 별도 지시에 따라 적용 */
 
   /* 9번: blockquote 내 p 태그 앞 이모지 글머리 제거 — 이모지는 텍스트 그 자체로만 */
   .md-content blockquote p { padding-left: 0; text-indent: 0; }
@@ -823,14 +816,14 @@
 
     const toc = document.createElement('nav');
     toc.className = 'toc';
-    let tocHtml = '<div class="toc-title">목차</div><ol>';
+    let tocHtml = '<div class="toc-title">목차</div><ul>';
     headings.forEach((h, i) => {
       const id = 'section-' + i;
       h.id = id;
       const label = h.textContent.trim();
       tocHtml += `<li><a href="#${id}">${label}</a></li>`;
     });
-    tocHtml += '</ol>';
+    tocHtml += '</ul>';
     toc.innerHTML = tocHtml;
 
     const firstH1 = container.querySelector('h1');
