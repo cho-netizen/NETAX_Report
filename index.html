@@ -402,11 +402,13 @@
   .md-content p { text-indent: 0; padding-left: 0; }
   .md-content td { text-indent: 0; padding-left: 12px; }
 
-  /* 8번: 금액 열 우정렬 — "원" 자가 수직으로 맞도록 */
+  /* 5번: 금액 열 우정렬 — "원" 자 수직 기준, 가장 긴 데이터 우측 글자에 맞춤 */
   .md-content td:last-child:not(:first-child) {
     text-align: right;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
+    white-space: nowrap;
+    padding-right: 16px;
   }
 
   /* 9번: blockquote 내 p 태그 앞 이모지 글머리 제거 — 이모지는 텍스트 그 자체로만 */
@@ -811,8 +813,12 @@
 
   // ===== 목차 자동 생성: h2(장 제목) 기준으로 상단에 네비게이션 삽입 =====
   function buildTableOfContents(container) {
-    // 1번: no-toc 클래스 h2는 목차에서 제외
-    const headings = Array.from(container.querySelectorAll('h2')).filter(h => !h.classList.contains('no-toc'));
+    // 1번: "기본 사실관계" 등 머리말 h2는 목차에서 제외 — 텍스트 내용으로 필터링
+    const EXCLUDE_HEADINGS = ['기본 사실관계'];
+    const headings = Array.from(container.querySelectorAll('h2')).filter(h => {
+      const text = h.textContent.trim();
+      return !EXCLUDE_HEADINGS.some(ex => text.startsWith(ex));
+    });
     if (headings.length < 2) return;
 
     const toc = document.createElement('nav');
@@ -821,8 +827,7 @@
     headings.forEach((h, i) => {
       const id = 'section-' + i;
       h.id = id;
-      // 제목에서 {.no-toc} 같은 마크다운 속성 텍스트 제거
-      const label = h.textContent.replace(/\{[^}]*\}/g, '').trim();
+      const label = h.textContent.trim();
       tocHtml += `<li><a href="#${id}">${label}</a></li>`;
     });
     tocHtml += '</ol>';
