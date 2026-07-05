@@ -11,6 +11,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<!-- KaTeX: 수식 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<!-- Chart.js: 원형·꺾은선·막대 차트 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Prism.js: 코드 하이라이팅 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 <style>
   :root {
     --navy: #0D1B3D;
@@ -404,6 +415,71 @@
 
   /* 금액 열 정렬: 추후 별도 지시에 따라 적용 */
 
+  /* ===== Chart.js 차트 ===== */
+  .chart-wrapper {
+    margin: 12px 0 24px;
+    background: #FAFAF7;
+    border: 1px solid #E4E0D8;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .chart-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  /* ===== 타임라인 ===== */
+  .timeline-chart {
+    margin: 12px 0 24px;
+    padding: 8px 0;
+    position: relative;
+  }
+  .timeline-chart::before {
+    content: '';
+    position: absolute;
+    left: 90px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .timeline-dot {
+    position: absolute;
+    left: 84px;
+    top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--navy);
+    flex-shrink: 0;
+  }
+  .timeline-date {
+    width: 78px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: right;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .timeline-label {
+    margin-left: 20px;
+    font-size: 13px;
+    color: #3A3A3A;
+    line-height: 1.6;
+  }
+
   /* 9번: blockquote 내 p 태그 앞 이모지 글머리 제거 — 이모지는 텍스트 그 자체로만 */
   .md-content blockquote p { padding-left: 0; text-indent: 0; }
 
@@ -698,6 +774,127 @@
     return res.json();
   }
 
+  // ===== KaTeX 수식 렌더링 =====
+  // 문법: 인라인 수식 $수식$, 블록 수식 $$수식$$
+  function renderKatex(container) {
+    if (!window.renderMathInElement) return;
+    renderMathInElement(container, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$',  right: '$',  display: false },
+      ],
+      throwOnError: false,
+      output: 'html',
+    });
+  }
+
+  // ===== Chart.js 차트 렌더링 =====
+  // 문법: ```chart
+  // type: pie | line | bar | doughnut | radar
+  // title: 차트 제목
+  // labels: 항목1, 항목2, 항목3
+  // data: 10, 20, 30
+  // colors: #색1, #색2, #색3  (선택)
+  // ```
+  function renderChartBlocks(container) {
+    if (!window.Chart) return;
+    const blocks = container.querySelectorAll('code.language-chart');
+    let chartIdx = 0;
+    blocks.forEach(block => {
+      chartIdx++;
+      const lines = block.textContent.trim().split('\n');
+      const cfg = {};
+      lines.forEach(l => {
+        const m = l.match(/^(\w+)\s*:\s*(.+)$/);
+        if (m) cfg[m[1].trim().toLowerCase()] = m[2].trim();
+      });
+
+      const type    = cfg.type    || 'bar';
+      const title   = cfg.title   || '';
+      const labels  = (cfg.labels || '').split(',').map(s => s.trim());
+      const data    = (cfg.data   || '').split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+      const defaultColors = ['#0D1B3D','#C8A244','#4A6080','#8BA3C7','#D4A96A','#6B8E9F','#2A3F63','#E8D5A3'];
+      const colors  = cfg.colors
+        ? cfg.colors.split(',').map(s => s.trim())
+        : defaultColors.slice(0, data.length);
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chart-wrapper';
+      if (title) {
+        const h = document.createElement('div');
+        h.className = 'chart-title';
+        h.textContent = title;
+        wrapper.appendChild(h);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'netax-chart-' + chartIdx;
+      canvas.style.maxHeight = '320px';
+      wrapper.appendChild(canvas);
+      block.closest('pre').replaceWith(wrapper);
+
+      new Chart(canvas, {
+        type,
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: colors,
+            borderColor: type === 'line' ? colors[0] : colors,
+            borderWidth: type === 'line' ? 2 : 1,
+            fill: type === 'line' ? false : undefined,
+            tension: 0.3,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: ['pie','doughnut','radar'].includes(type) },
+            title: { display: false },
+          },
+          scales: ['pie','doughnut','radar'].includes(type) ? {} : {
+            y: { beginAtZero: true, ticks: { font: { family: "'Noto Sans KR'" } } },
+            x: { ticks: { font: { family: "'Noto Sans KR'" } } },
+          },
+        }
+      });
+    });
+  }
+
+  // ===== Prism.js 코드 하이라이팅 =====
+  // 문법: ```js, ```python, ```sql 등 일반 코드블록
+  function renderPrismBlocks(container) {
+    if (!window.Prism) return;
+    Prism.highlightAllUnder(container);
+  }
+
+  // ===== 타임라인 렌더링 =====
+  // 문법: ```timeline
+  // 2015.01 : 201호 취득
+  // 2021.03 : 이혼·합가
+  // 2026.07 : 매매 예정
+  // ```
+  function renderTimelineBlocks(container) {
+    const blocks = container.querySelectorAll('code.language-timeline');
+    blocks.forEach(block => {
+      const lines = block.textContent.trim().split('\n').filter(l => l.includes(':'));
+      const wrapper = document.createElement('div');
+      wrapper.className = 'timeline-chart';
+      lines.forEach(l => {
+        const idx = l.indexOf(':');
+        const date  = l.slice(0, idx).trim();
+        const label = l.slice(idx + 1).trim();
+        wrapper.innerHTML += `
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">${date}</div>
+            <div class="timeline-label">${label}</div>
+          </div>`;
+      });
+      block.closest('pre').replaceWith(wrapper);
+    });
+  }
+
   // Mermaid 다이어그램을 NETAX 브랜드 컬러로 초기화
   if (window.mermaid) {
     mermaid.initialize({
@@ -859,6 +1056,10 @@
       contentEl.innerHTML = renderedHtml;
       renderMermaidBlocks(contentEl);
       renderCompareBars(contentEl);
+      renderChartBlocks(contentEl);
+      renderTimelineBlocks(contentEl);
+      renderPrismBlocks(contentEl);
+      renderKatex(contentEl);
       applyCalloutColors(contentEl);
       buildTableOfContents(contentEl);
     } else {
