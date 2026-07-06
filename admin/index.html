@@ -58,6 +58,21 @@
     margin-bottom: 24px;
   }
 
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; }
+    .card {
+      max-width: 100%;
+      min-height: 100dvh;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 36px 20px 20px;
+    }
+    .card::before { border-radius: 0; }
+    h1 { font-size: 19px; }
+    .customer-list { max-height: none; flex: 1; }
+  }
+
   .field-row {
     display: flex;
     gap: 8px;
@@ -79,7 +94,7 @@
     text-align: center;
   }
 
-  input::placeholder { color: rgba(246,243,236,0.55); font-size: 13px; }
+  input::placeholder { color: rgba(246,243,236,0.55); font-size: 12px; }
 
   input:focus {
     outline: none;
@@ -139,6 +154,24 @@
     font-size: 16px;
     font-weight: 600;
   }
+
+  .customer-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .badge-expired { background: rgba(177,69,69,0.25); color: #E68A8A; }
+  .badge-active { background: rgba(76,140,90,0.25); color: #8FCB9E; }
+  .badge-pending { background: rgba(200,162,68,0.2); color: var(--gold-light); }
 
   .customer-meta {
     color: rgba(246,243,236,0.55);
@@ -204,8 +237,19 @@
       const metaParts = [];
       if (c.title) metaParts.push(c.title);
       if (c.issued) metaParts.push('발급일: ' + formatDate(c.issued));
+      const badges = [
+        c.is_expired
+          ? '<span class="badge badge-expired">기간만료</span>'
+          : '',
+        c.has_accessed
+          ? '<span class="badge badge-active">접속완료</span>'
+          : '<span class="badge badge-pending">미접속</span>'
+      ].join('');
       return `<a class="customer-item" href="${url}">
-        <div class="customer-name">${escapeHtml(c.name)}</div>
+        <div class="customer-name-row">
+          <span class="customer-name">${escapeHtml(c.name)}</span>
+          ${badges}
+        </div>
         <div class="customer-meta">${escapeHtml(metaParts.join(' · '))}</div>
       </a>`;
     }).join('');
