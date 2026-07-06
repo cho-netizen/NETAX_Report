@@ -742,7 +742,7 @@
     letter-spacing: 0.02em;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 1024px), (max-height: 1024px) {
     body { padding: 0; align-items: stretch; }
     .card {
       max-width: 100%;
@@ -757,6 +757,13 @@
     }
     .card::before, .card::after { border-radius: 0; }
     #loginCard h1 { font-size: 21px; }
+
+    .viewer {
+      max-width: 100%;
+      max-height: none;
+      height: 100dvh;
+      border-radius: 0;
+    }
   }
 </style>
 </head>
