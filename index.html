@@ -194,14 +194,6 @@
 
   .message.error { color: var(--error); }
 
-  .password-hint {
-    margin-top: 8px;
-    font-size: 12.5px;
-    line-height: 1.6;
-    text-align: center;
-    color: rgba(245, 242, 236, 0.65);
-  }
-
   /* ===== 열람 화면 ===== */
   .viewer {
     display: none;
@@ -392,6 +384,8 @@
   }
 
   .md-content table {
+    width: max-content;
+    max-width: none;
     border-collapse: collapse;
     margin: 0;
     font-size: 14px;
@@ -757,7 +751,7 @@
   <div class="card" id="loginCard">
     <h1>Consulting Report</h1>
 
-    <p class="footer-highlight">이 <span class="highlight-strong">자문용역 보고서</span> 는<br>고객님을 위해 <span class="highlight">맞춤형</span>으로<br>종이문서가 아닌 <span class="highlight">전용 페이지</span>로<br>특별히 제작하여<br>드리는 문서입니다.<br>스마트기기로 언제 어디서든<br>열람하실 수 있습니다.<br>열람가능 기간은<br>발급일로부터 30일입니다.</p>
+    <p class="footer-highlight">이 <span class="highlight-strong">자문용역 보고서</span> 는<br>고객님을 위해 <span class="highlight">맞춤형</span>으로<br>종이문서가 아닌 <span class="highlight">전용 페이지</span>로<br>특별히 제작하여<br>드리는 문서입니다.<br>스마트기기로 언제 어디서든<br>열람하실 수 있습니다.<br><span id="introDynamicText">열람가능 기간은<br>발급일로부터 30일입니다.</span></p>
 
     <form id="idForm">
       <div class="field-row">
@@ -771,7 +765,6 @@
         <input type="password" id="password" placeholder="비밀번호" aria-label="비밀번호" autocomplete="off" required>
         <button type="submit" id="submitBtn">열람하기</button>
       </div>
-      <p class="password-hint" id="passwordHint" style="visibility:hidden;">지금 설정하시는 비밀번호로 계속 접속하시면 됩니다.<br>잊지 않도록 기억해주세요.</p>
     </form>
 
     <div class="message" id="message"></div>
@@ -829,7 +822,7 @@
   const submitBtn = document.getElementById('submitBtn');
   const messageEl = document.getElementById('message');
   const passwordInput = document.getElementById('password');
-  const passwordHint = document.getElementById('passwordHint');
+  const introDynamicText = document.getElementById('introDynamicText');
 
   let currentReportId = '';
 
@@ -1171,6 +1164,20 @@
 
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('viewer').style.display = 'flex';
+
+    // 스크롤 위치를 맨 위로 강제 초기화 (이전 위치나 브라우저 자동 스크롤 보정으로
+    // 중간부터 보이는 문제 방지). 비동기 렌더링(mermaid 등) 이후에도 한 번 더 보정.
+    const frameWrap = document.querySelector('.viewer-frame-wrap');
+    window.scrollTo(0, 0);
+    if (frameWrap) frameWrap.scrollTop = 0;
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      if (frameWrap) frameWrap.scrollTop = 0;
+    });
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      if (frameWrap) frameWrap.scrollTop = 0;
+    }, 300);
   }
 
   document.getElementById('materialContent').addEventListener('contextmenu', (e) => {
@@ -1273,17 +1280,17 @@
       const data = await callBackend({ report_id: reportId });
 
       if (data.needs_setup) {
-        // 최초 접속 -> 비밀번호 설정 (같은 화면, placeholder와 안내 문구만 변경)
+        // 최초 접속 -> 비밀번호 설정 (같은 화면, placeholder와 안내문구 자리의 텍스트만 교체)
         currentReportId = reportId;
         passwordInput.placeholder = '새 비밀번호 설정';
-        passwordHint.style.visibility = 'visible';
+        introDynamicText.innerHTML = '지금 설정하시는 비밀번호로<br>계속 접속하시면 됩니다.';
         idForm.style.display = 'none';
         passwordForm.style.display = 'block';
       } else if (data.needs_login) {
         // 이미 비밀번호 설정됨 -> 로그인 화면
         currentReportId = reportId;
         passwordInput.placeholder = '비밀번호 입력';
-        passwordHint.style.visibility = 'hidden';
+        introDynamicText.innerHTML = '열람가능 기간은<br>발급일로부터 30일입니다.';
         idForm.style.display = 'none';
         passwordForm.style.display = 'block';
       } else if (data.success) {
