@@ -237,6 +237,8 @@
       const metaParts = [];
       if (c.title) metaParts.push(c.title);
       if (c.issued) metaParts.push('발급일: ' + formatDate(c.issued));
+      if (c.first_access) metaParts.push('최초접속: ' + formatDate(c.first_access));
+      if (c.access_count > 0) metaParts.push('접속 ' + c.access_count + '회');
       const badges = [
         c.is_expired
           ? '<span class="badge badge-expired">기간만료</span>'
