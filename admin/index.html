@@ -249,9 +249,9 @@
       if (c.issued) topParts.push(`<span class="customer-issued">${formatDate(c.issued)}</span>`);
 
       const metaParts = [];
-      if (c.first_access) metaParts.push('최초접속 ' + formatDate(c.first_access));
+      if (c.first_access) metaParts.push('최초 ' + formatDate(c.first_access));
       if (c.access_count > 0) metaParts.push('접속 ' + c.access_count + '회');
-      if (c.last_access) metaParts.push('최종접속 ' + formatDate(c.last_access));
+      if (c.last_access) metaParts.push('최종 ' + formatDate(c.last_access));
 
       return `<a class="customer-item" href="${url}">
         <div class="customer-name-row">
