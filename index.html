@@ -275,7 +275,7 @@
   /* 폰 화면: 헤더에서 전체화면 버튼만 남기고 나머지는 숨김 */
   @media (max-width: 480px), (max-height: 500px) {
     .viewer-header {
-      padding: 8px 14px;
+      padding: 6px 14px;
       justify-content: flex-end;
     }
     .viewer-header .greeting,
@@ -283,8 +283,14 @@
       display: none;
     }
     #fullscreenBtn {
-      padding: 6px 14px;
-      font-size: 12px;
+      padding: 5px 8px;
+      font-size: 15px;
+    }
+    #fullscreenBtn .btn-label {
+      display: none;
+    }
+    .viewer-header-right {
+      gap: 8px;
     }
 
     /* 보고서 본문: 표/제목이 좁은 화면에서도 형태를 유지하도록 글씨 축소 */
@@ -791,7 +797,7 @@
       <div class="greeting"><span id="customerName"></span> 고객님, 자문용역보고서</div>
       <div class="viewer-header-right">
         <img src="netax-wordmark.png" alt="NETAX" class="expiry-logo">
-        <button type="button" id="fullscreenBtn" title="전체화면으로 보기">⛶ 전체화면</button>
+        <button type="button" id="fullscreenBtn" title="전체화면으로 보기">⛶ <span class="btn-label">전체화면</span></button>
       </div>
     </div>
     <div class="viewer-frame-wrap">
@@ -1218,6 +1224,18 @@
       (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
     }
   });
+
+  // 전체화면 상태에 따라 버튼 아이콘·라벨 전환 (ESC로 빠져나가는 경우도 정확히 반영됨)
+  function updateFullscreenBtnLabel() {
+    const btn = document.getElementById('fullscreenBtn');
+    const isFullscreen = !!document.fullscreenElement;
+    btn.innerHTML = isFullscreen
+      ? '⛶ <span class="btn-label">기본보기</span>'
+      : '⛶ <span class="btn-label">전체화면</span>';
+    btn.title = isFullscreen ? '기본 화면으로 보기' : '전체화면으로 보기';
+  }
+  document.addEventListener('fullscreenchange', updateFullscreenBtnLabel);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenBtnLabel);
 
   // ===== 관리자 우회: ?report_id=7K4M&admin=관리자코드 로 접속하면 자동 진입 =====
   if (prefilledId && adminCodeParam) {
