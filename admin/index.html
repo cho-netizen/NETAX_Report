@@ -167,7 +167,7 @@
 
     <form id="adminForm">
       <div class="field-row">
-        <input type="text" id="adminPassword" placeholder="관리자 비밀번호" aria-label="관리자 비밀번호" autocomplete="off" required>
+        <input type="text" id="adminCode" placeholder="관리자 비밀번호" aria-label="관리자 비밀번호" autocomplete="off" required>
         <button type="submit" id="submitBtn">확인</button>
       </div>
     </form>
@@ -235,7 +235,7 @@
 
   adminForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const password = document.getElementById('adminPassword').value;
+    const password = document.getElementById('adminCode').value;
     submitBtn.disabled = true;
     messageEl.textContent = '';
     messageEl.className = 'message';
