@@ -64,7 +64,8 @@
     margin-bottom: 8px;
   }
 
-  input[type="password"] {
+  input[type="password"],
+  input[type="text"] {
     flex: 1;
     min-width: 0;
     width: 100%;
@@ -166,7 +167,7 @@
 
     <form id="adminForm">
       <div class="field-row">
-        <input type="password" id="adminPassword" placeholder="관리자 비밀번호" aria-label="관리자 비밀번호" autocomplete="off" required>
+        <input type="text" id="adminPassword" placeholder="관리자 비밀번호" aria-label="관리자 비밀번호" autocomplete="off" required>
         <button type="submit" id="submitBtn">확인</button>
       </div>
     </form>
