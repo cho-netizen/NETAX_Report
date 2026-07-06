@@ -118,6 +118,11 @@
     font-weight: 600;
   }
 
+  #introDynamicText.setup-notice {
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+
   .field-row {
     display: flex;
     gap: 8px;
@@ -1284,6 +1289,7 @@
         currentReportId = reportId;
         passwordInput.placeholder = '새 비밀번호 설정';
         introDynamicText.innerHTML = '지금 설정하시는 비밀번호로<br>계속 접속하시면 됩니다.';
+        introDynamicText.classList.add('setup-notice');
         idForm.style.display = 'none';
         passwordForm.style.display = 'block';
       } else if (data.needs_login) {
@@ -1291,6 +1297,7 @@
         currentReportId = reportId;
         passwordInput.placeholder = '비밀번호 입력';
         introDynamicText.innerHTML = '열람가능 기간은<br>발급일로부터 30일입니다.';
+        introDynamicText.classList.remove('setup-notice');
         idForm.style.display = 'none';
         passwordForm.style.display = 'block';
       } else if (data.success) {
