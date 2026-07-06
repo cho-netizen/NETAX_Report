@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>관리자 대시보드 | NETAX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D1B3D;
+    --navy-deep: #081226;
+    --cream: #F8F6F0;
+    --gold: #C8A244;
+    --gold-light: #DCC17E;
+    --error: #B14545;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--navy-deep);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--navy);
+    border: 1px solid rgba(176,141,87,0.25);
+    border-radius: 4px;
+    padding: 40px 32px;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-light), var(--gold), var(--gold-light));
+    border-radius: 4px 4px 0 0;
+  }
+
+  h1 {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--cream);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .field-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  input[type="password"] {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    padding: 13px 14px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 3px;
+    color: var(--cream);
+    font-size: 15px;
+    font-family: 'Noto Sans KR', sans-serif;
+    text-align: center;
+  }
+
+  input::placeholder { color: rgba(246,243,236,0.55); font-size: 13px; }
+
+  input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(255,255,255,0.06);
+  }
+
+  button {
+    width: auto;
+    white-space: nowrap;
+    padding: 0 22px;
+    background: var(--gold);
+    color: var(--navy-deep);
+    border: none;
+    border-radius: 3px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  button:hover { background: var(--gold-light); }
+  button:disabled { opacity: 0.5; cursor: default; }
+
+  .message {
+    margin-top: 8px;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .message.error { color: var(--error); }
+
+  .customer-list {
+    display: none;
+    margin-top: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .customer-item {
+    display: block;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .customer-item:hover {
+    background: rgba(255,255,255,0.11);
+    border-color: var(--gold);
+  }
+
+  .customer-name {
+    color: var(--cream);
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .customer-meta {
+    color: rgba(246,243,236,0.55);
+    font-size: 12.5px;
+    margin-top: 4px;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: rgba(246,243,236,0.55);
+    font-size: 14px;
+    padding: 24px 0;
+  }
+
+  .search-box {
+    margin-top: 16px;
+    margin-bottom: 12px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+  <div class="card" id="loginCard">
+    <h1>관리자 대시보드</h1>
+
+    <form id="adminForm">
+      <div class="field-row">
+        <input type="password" id="adminPassword" placeholder="관리자 비밀번호" aria-label="관리자 비밀번호" autocomplete="off" required>
+        <button type="submit" id="submitBtn">확인</button>
+      </div>
+    </form>
+
+    <div id="message" class="message"></div>
+
+    <div class="search-box" id="searchBox">
+      <input type="text" id="searchInput" placeholder="고객명 검색">
+    </div>
+
+    <div class="customer-list" id="customerList"></div>
+  </div>
+
+<script>
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyg0gDbzPPkpZs2Gnsuw7Qh_qszYy1_8f2Q-SN7Ffreoc3GfHzIZ7B5UXNidT5ale_b/exec';
+
+  const adminForm = document.getElementById('adminForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const messageEl = document.getElementById('message');
+  const customerListEl = document.getElementById('customerList');
+  const searchBox = document.getElementById('searchBox');
+  const searchInput = document.getElementById('searchInput');
+
+  let allCustomers = [];
+  let currentAdminCode = '';
+
+  function renderCustomers(list) {
+    if (list.length === 0) {
+      customerListEl.innerHTML = '<div class="empty-state">검색 결과가 없습니다.</div>';
+      return;
+    }
+    customerListEl.innerHTML = list.map(c => {
+      const url = `https://rpt.netax.kr/?report_id=${encodeURIComponent(c.report_id)}&admin=${encodeURIComponent(currentAdminCode)}`;
+      const metaParts = [];
+      if (c.title) metaParts.push(c.title);
+      if (c.issued) metaParts.push('발급일: ' + formatDate(c.issued));
+      return `<a class="customer-item" href="${url}">
+        <div class="customer-name">${escapeHtml(c.name)}</div>
+        <div class="customer-meta">${escapeHtml(metaParts.join(' · '))}</div>
+      </a>`;
+    }).join('');
+  }
+
+  function formatDate(value) {
+    try {
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return String(value);
+      return d.toLocaleDateString('ko-KR');
+    } catch (e) {
+      return String(value);
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+  }
+
+  searchInput.addEventListener('input', () => {
+    const keyword = searchInput.value.trim().toLowerCase();
+    const filtered = allCustomers.filter(c => c.name.toLowerCase().includes(keyword));
+    renderCustomers(filtered);
+  });
+
+  adminForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = document.getElementById('adminPassword').value;
+    submitBtn.disabled = true;
+    messageEl.textContent = '';
+    messageEl.className = 'message';
+
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'admin_list', admin_code: password })
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        messageEl.textContent = data.message || '오류가 발생했습니다.';
+        messageEl.className = 'message error';
+        submitBtn.disabled = false;
+        return;
+      }
+
+      currentAdminCode = password;
+      allCustomers = data.customers;
+      adminForm.style.display = 'none';
+      searchBox.style.display = 'block';
+      customerListEl.style.display = 'block';
+      renderCustomers(allCustomers);
+
+    } catch (err) {
+      messageEl.textContent = '서버 연결에 실패했습니다.';
+      messageEl.className = 'message error';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
