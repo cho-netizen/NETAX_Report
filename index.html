@@ -753,7 +753,7 @@
 
     <form id="idForm">
       <div class="field-row">
-        <input type="text" id="reportId" placeholder="열람번호 입력" aria-label="열람번호" autocomplete="off" style="text-transform:uppercase;" required>
+        <input type="text" id="reportId" placeholder="예: 7K4M" aria-label="열람번호" autocomplete="off" maxlength="4" style="text-transform:uppercase;" required>
         <button type="submit" id="idSubmitBtn">확인</button>
       </div>
     </form>
@@ -796,9 +796,9 @@
   // ===== 설정 =====
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyg0gDbzPPkpZs2Gnsuw7Qh_qszYy1_8f2Q-SN7Ffreoc3GfHzIZ7B5UXNidT5ale_b/exec';
 
-  // URL에 ?report_id=R001 형태로 넘어오면 자동 채움
+  // URL에 ?report_id=7K4M 형태로 넘어오면 자동 채움
   const urlParams = new URLSearchParams(window.location.search);
-  const prefilledId = urlParams.get('report_id');
+  const prefilledId = urlParams.get('report_id') ? formatReportId(urlParams.get('report_id')).toUpperCase() : '';
   const adminCodeParam = urlParams.get('admin');
   if (prefilledId) document.getElementById('reportId').value = prefilledId;
 
@@ -1184,7 +1184,7 @@
     }
   });
 
-  // ===== 관리자 우회: ?report_id=R001&admin=관리자코드 로 접속하면 자동 진입 =====
+  // ===== 관리자 우회: ?report_id=7K4M&admin=관리자코드 로 접속하면 자동 진입 =====
   if (prefilledId && adminCodeParam) {
     callBackend({ report_id: prefilledId, admin_code: adminCodeParam }).then(data => {
       if (data.success) {
@@ -1241,11 +1241,23 @@
     return result;
   }
 
+  // 열람번호 형식 정리 — 영문·숫자만 남기고 4자로 제한
+  function formatReportId(raw) {
+    return raw.replace(/[^A-Za-z0-9]/g, '').slice(0, 4);
+  }
+
+  // 타이핑하는 동안 4자리마다 자동으로 하이픈 삽입 (XXXX-XXXX)
+  document.getElementById('reportId').addEventListener('input', (e) => {
+    const cursorAtEnd = e.target.selectionEnd === e.target.value.length;
+    e.target.value = formatReportId(e.target.value);
+    if (cursorAtEnd) e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+  });
+
   // ===== 1단계: 열람번호 확인 =====
   idForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const rawInput = document.getElementById('reportId').value.trim();
-    const reportId = normalizeReportId(rawInput).toUpperCase();
+    const reportId = formatReportId(normalizeReportId(rawInput)).toUpperCase();
     if (!reportId) return;
 
     idSubmitBtn.disabled = true;
