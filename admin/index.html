@@ -155,6 +155,16 @@
     font-weight: 600;
   }
 
+  .customer-title {
+    color: rgba(246,243,236,0.6);
+    font-size: 13px;
+  }
+
+  .customer-issued {
+    color: rgba(246,243,236,0.45);
+    font-size: 12px;
+  }
+
   .customer-name-row {
     display: flex;
     align-items: center;
@@ -170,8 +180,6 @@
     white-space: nowrap;
   }
   .badge-expired { background: rgba(177,69,69,0.25); color: #E68A8A; }
-  .badge-active { background: rgba(76,140,90,0.25); color: #8FCB9E; }
-  .badge-pending { background: rgba(200,162,68,0.2); color: var(--gold-light); }
 
   .customer-meta {
     color: rgba(246,243,236,0.55);
@@ -234,23 +242,21 @@
     }
     customerListEl.innerHTML = list.map(c => {
       const url = `https://rpt.netax.kr/?report_id=${encodeURIComponent(c.report_id)}&admin=${encodeURIComponent(currentAdminCode)}`;
+      const badge = c.is_expired ? '<span class="badge badge-expired">기간만료</span>' : '';
+
+      const topParts = [`<span class="customer-name">${escapeHtml(c.name)}</span>`];
+      if (c.title) topParts.push(`<span class="customer-title">${escapeHtml(c.title)}</span>`);
+      if (c.issued) topParts.push(`<span class="customer-issued">${formatDate(c.issued)}</span>`);
+
       const metaParts = [];
-      if (c.title) metaParts.push(c.title);
-      if (c.issued) metaParts.push('발급일: ' + formatDate(c.issued));
-      if (c.first_access) metaParts.push('최초접속: ' + formatDate(c.first_access));
+      if (c.first_access) metaParts.push('최초접속 ' + formatDate(c.first_access));
       if (c.access_count > 0) metaParts.push('접속 ' + c.access_count + '회');
-      const badges = [
-        c.is_expired
-          ? '<span class="badge badge-expired">기간만료</span>'
-          : '',
-        c.has_accessed
-          ? '<span class="badge badge-active">접속완료</span>'
-          : '<span class="badge badge-pending">미접속</span>'
-      ].join('');
+      if (c.last_access) metaParts.push('최종접속 ' + formatDate(c.last_access));
+
       return `<a class="customer-item" href="${url}">
         <div class="customer-name-row">
-          <span class="customer-name">${escapeHtml(c.name)}</span>
-          ${badges}
+          ${topParts.join('')}
+          ${badge}
         </div>
         <div class="customer-meta">${escapeHtml(metaParts.join(' · '))}</div>
       </a>`;
@@ -261,7 +267,10 @@
     try {
       const d = new Date(value);
       if (isNaN(d.getTime())) return String(value);
-      return d.toLocaleDateString('ko-KR');
+      const yy = String(d.getFullYear()).slice(-2);
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yy}-${mm}-${dd}`;
     } catch (e) {
       return String(value);
     }
