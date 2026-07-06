@@ -272,25 +272,28 @@
 
   #fullscreenBtn:hover { background: rgba(255,255,255,0.18); }
 
-  /* 폰 화면: 헤더에서 전체화면 버튼만 남기고 나머지는 숨김 */
+  /* 폰 화면: 헤더에서 인사말만 숨기고, 로고와 버튼은 유지 */
   @media (max-width: 480px), (max-height: 500px) {
     .viewer-header {
       padding: 6px 14px;
-      justify-content: flex-end;
+      justify-content: space-between;
     }
-    .viewer-header .greeting,
-    .expiry-logo {
+    .viewer-header .greeting {
       display: none;
     }
+    .expiry-logo {
+      height: 14px;
+    }
     #fullscreenBtn {
-      padding: 5px 8px;
-      font-size: 15px;
+      padding: 3px 10px;
+      font-size: 16px;
+      line-height: 1.2;
     }
     #fullscreenBtn .btn-label {
       display: none;
     }
     .viewer-header-right {
-      gap: 8px;
+      gap: 10px;
     }
 
     /* 보고서 본문: 표/제목이 좁은 화면에서도 형태를 유지하도록 글씨 축소 */
@@ -804,7 +807,7 @@
       <div class="greeting"><span id="customerName"></span> 고객님, 자문용역보고서</div>
       <div class="viewer-header-right">
         <img src="netax-wordmark.png" alt="NETAX" class="expiry-logo">
-        <button type="button" id="fullscreenBtn" title="전체화면으로 보기">⛶ <span class="btn-label">전체화면</span></button>
+        <button type="button" id="fullscreenBtn" title="전체화면으로 보기">⤢ <span class="btn-label">전체화면</span></button>
       </div>
     </div>
     <div class="viewer-frame-wrap">
@@ -1237,8 +1240,8 @@
     const btn = document.getElementById('fullscreenBtn');
     const isFullscreen = !!document.fullscreenElement;
     btn.innerHTML = isFullscreen
-      ? '⛶ <span class="btn-label">기본보기</span>'
-      : '⛶ <span class="btn-label">전체화면</span>';
+      ? '⤡ <span class="btn-label">기본보기</span>'
+      : '⤢ <span class="btn-label">전체화면</span>';
     btn.title = isFullscreen ? '기본 화면으로 보기' : '전체화면으로 보기';
   }
   document.addEventListener('fullscreenchange', updateFullscreenBtnLabel);
