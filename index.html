@@ -365,13 +365,25 @@
   .md-content li { margin-bottom: 6px; }
 
   .md-content .table-scroll {
+    position: relative;
     overflow-x: auto;
     margin: 8px 0 24px;
   }
 
+  /* 실제로 넘치는 표에만 우측에 은은한 스크롤 힌트 삼각형 표시 */
+  .md-content .table-scroll.scrollable::after {
+    content: '▸';
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    color: rgba(200, 162, 68, 0.55);
+    font-size: 16px;
+    pointer-events: none;
+    text-shadow: -1px 0 3px rgba(255,255,255,0.9), 1px 0 3px rgba(255,255,255,0.9);
+  }
+
   .md-content table {
-    width: 100%;
-    min-width: 600px;
     border-collapse: collapse;
     margin: 0;
     font-size: 14px;
@@ -1048,6 +1060,15 @@
     });
   }
 
+  // ===== 표 우측 스크롤 힌트: 실제로 화면보다 넓어 스크롤이 필요한 표에만 표시 =====
+  function markScrollableTables(container) {
+    container.querySelectorAll('.table-scroll').forEach(el => {
+      if (el.scrollWidth > el.clientWidth + 1) {
+        el.classList.add('scrollable');
+      }
+    });
+  }
+
   // ===== 알림 상자 색상 구분: 인용문 첫 글자(이모지)로 판별해 색상만 부여하고, 이모지 글자 자체는 화면에서 제거 =====
   function applyCalloutColors(container) {
     const quotes = container.querySelectorAll('blockquote');
@@ -1129,6 +1150,7 @@
       renderPrismBlocks(contentEl);
       renderKatex(contentEl);
       applyCalloutColors(contentEl);
+      markScrollableTables(contentEl);
       buildTableOfContents(contentEl);
     } else {
       // 기존 방식: 구글 드라이브 파일을 iframe으로 표시
