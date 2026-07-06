@@ -155,7 +155,7 @@
     transition: border-color 0.15s ease, background 0.15s ease;
   }
 
-  input::placeholder { color: rgba(246,243,236,0.55); font-size: 13px; }
+  input::placeholder { color: rgba(246,243,236,0.55); font-size: 12px; }
 
   input:focus {
     outline: none;
@@ -1306,7 +1306,7 @@
       if (data.needs_setup) {
         // 최초 접속 -> 비밀번호 설정 (같은 화면, placeholder와 안내문구 자리의 텍스트만 교체)
         currentReportId = reportId;
-        passwordInput.placeholder = '새 비밀번호 설정';
+        passwordInput.placeholder = '비밀번호 설정';
         introDynamicText.innerHTML = '지금 설정하시는 비밀번호로<br>계속 접속하시면 됩니다.';
         introDynamicText.classList.add('setup-notice');
         idForm.style.display = 'none';
