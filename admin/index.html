@@ -250,7 +250,7 @@
 
       const metaParts = [];
       if (c.first_access) metaParts.push('최초 ' + formatDate(c.first_access));
-      if (c.access_count > 0) metaParts.push('접속 ' + c.access_count + '회');
+      if (c.access_count > 0) metaParts.push(c.access_count + '회');
       if (c.last_access) metaParts.push('최종 ' + formatDate(c.last_access));
 
       return `<a class="customer-item" href="${url}">
