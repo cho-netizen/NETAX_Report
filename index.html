@@ -194,6 +194,14 @@
 
   .message.error { color: var(--error); }
 
+  .password-hint {
+    margin-top: 8px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    text-align: center;
+    color: rgba(245, 242, 236, 0.65);
+  }
+
   /* ===== 열람 화면 ===== */
   .viewer {
     display: none;
@@ -763,9 +771,7 @@
         <input type="password" id="password" placeholder="비밀번호" aria-label="비밀번호" autocomplete="off" required>
         <button type="submit" id="submitBtn">열람하기</button>
       </div>
-      <div class="field-row" id="passwordConfirmField" style="display:none;">
-        <input type="password" id="passwordConfirm" placeholder="비밀번호 확인" aria-label="비밀번호 확인" autocomplete="off">
-      </div>
+      <p class="password-hint" id="passwordHint" style="visibility:hidden;">여기서 설정하시는 비밀번호로 앞으로 계속 접속하시게 됩니다. 잊지 않도록 기억해주세요.</p>
     </form>
 
     <div class="message" id="message"></div>
@@ -823,11 +829,9 @@
   const submitBtn = document.getElementById('submitBtn');
   const messageEl = document.getElementById('message');
   const passwordInput = document.getElementById('password');
-  const passwordRow = document.getElementById('passwordRow');
-  const passwordConfirmField = document.getElementById('passwordConfirmField');
+  const passwordHint = document.getElementById('passwordHint');
 
   let currentReportId = '';
-  let isNewSetup = false;
 
   async function callBackend(payload) {
     const res = await fetch(APPS_SCRIPT_URL, {
@@ -1269,23 +1273,17 @@
       const data = await callBackend({ report_id: reportId });
 
       if (data.needs_setup) {
-        // 최초 접속 -> 비밀번호 설정 화면
+        // 최초 접속 -> 비밀번호 설정 (같은 화면, placeholder와 안내 문구만 변경)
         currentReportId = reportId;
-        isNewSetup = true;
         passwordInput.placeholder = '새 비밀번호 설정';
-        passwordConfirmField.style.display = 'flex';
-        document.getElementById('passwordConfirm').required = true;
-        passwordConfirmField.appendChild(submitBtn);
+        passwordHint.style.visibility = 'visible';
         idForm.style.display = 'none';
         passwordForm.style.display = 'block';
       } else if (data.needs_login) {
         // 이미 비밀번호 설정됨 -> 로그인 화면
         currentReportId = reportId;
-        isNewSetup = false;
         passwordInput.placeholder = '비밀번호 입력';
-        passwordConfirmField.style.display = 'none';
-        document.getElementById('passwordConfirm').required = false;
-        passwordRow.appendChild(submitBtn);
+        passwordHint.style.visibility = 'hidden';
         idForm.style.display = 'none';
         passwordForm.style.display = 'block';
       } else if (data.success) {
@@ -1308,13 +1306,6 @@
   passwordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const password = document.getElementById('password').value;
-    const passwordConfirm = document.getElementById('passwordConfirm').value;
-
-    if (isNewSetup && password !== passwordConfirm) {
-      messageEl.textContent = '비밀번호가 서로 일치하지 않습니다.';
-      messageEl.className = 'message error';
-      return;
-    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = '확인 중...';
