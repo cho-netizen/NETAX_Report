@@ -375,18 +375,22 @@
     margin: 8px 0 24px;
   }
 
-  /* 실제로 넘치는 표에만 우측에 은은한 스크롤 힌트 삼각형 표시 */
-  .md-content .table-scroll.scrollable::after {
-    content: '▸';
+  /* 스크롤 힌트: 스크롤바가 위치하는 하단 모서리에 배치, 스크롤 위치에 따라 좌/우 독립적으로 표시 */
+  .md-content .table-scroll.scrollable::after,
+  .md-content .table-scroll.scrollable::before {
     position: absolute;
-    top: 50%;
-    right: 6px;
-    transform: translateY(-50%);
-    color: rgba(200, 162, 68, 0.55);
-    font-size: 16px;
+    bottom: 3px;
+    color: rgba(200, 162, 68, 0.6);
+    font-size: 13px;
     pointer-events: none;
     text-shadow: -1px 0 3px rgba(255,255,255,0.9), 1px 0 3px rgba(255,255,255,0.9);
+    transition: opacity 0.15s ease;
+    opacity: 0;
   }
+  .md-content .table-scroll.scrollable::after { content: '▸'; right: 3px; }
+  .md-content .table-scroll.scrollable::before { content: '◂'; left: 3px; }
+  .md-content .table-scroll.scrollable.show-right::after { opacity: 1; }
+  .md-content .table-scroll.scrollable.show-left::before { opacity: 1; }
 
   .md-content table {
     width: max-content;
@@ -1062,11 +1066,20 @@
     });
   }
 
-  // ===== 표 우측 스크롤 힌트: 실제로 화면보다 넓어 스크롤이 필요한 표에만 표시 =====
+  // ===== 표 스크롤 힌트: 실제로 화면보다 넓어 스크롤이 필요한 표에만, 스크롤 위치에 따라 좌/우 화살표 표시 =====
+  function updateScrollHint(el) {
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    el.classList.toggle('show-right', el.scrollLeft < maxScroll - 2);
+    el.classList.toggle('show-left', el.scrollLeft > 2);
+  }
+
   function markScrollableTables(container) {
     container.querySelectorAll('.table-scroll').forEach(el => {
       if (el.scrollWidth > el.clientWidth + 1) {
+        const isNew = !el.classList.contains('scrollable');
         el.classList.add('scrollable');
+        updateScrollHint(el);
+        if (isNew) el.addEventListener('scroll', () => updateScrollHint(el));
       }
     });
   }
@@ -1152,7 +1165,6 @@
       renderPrismBlocks(contentEl);
       renderKatex(contentEl);
       applyCalloutColors(contentEl);
-      markScrollableTables(contentEl);
       buildTableOfContents(contentEl);
     } else {
       // 기존 방식: 구글 드라이브 파일을 iframe으로 표시
@@ -1170,6 +1182,12 @@
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('viewer').style.display = 'flex';
 
+    // 뷰어가 화면에 실제로 보이게 된 뒤에 측정해야 scrollWidth/clientWidth가 정확함
+    // (display:none 상태에서 재면 항상 0이라 넘침 감지가 안 됨)
+    if (data.report_content) {
+      markScrollableTables(contentEl);
+    }
+
     // 스크롤 위치를 맨 위로 강제 초기화 (이전 위치나 브라우저 자동 스크롤 보정으로
     // 중간부터 보이는 문제 방지). 비동기 렌더링(mermaid 등) 이후에도 한 번 더 보정.
     const frameWrap = document.querySelector('.viewer-frame-wrap');
@@ -1182,6 +1200,7 @@
     setTimeout(() => {
       window.scrollTo(0, 0);
       if (frameWrap) frameWrap.scrollTop = 0;
+      if (data.report_content) markScrollableTables(contentEl);
     }, 300);
   }
 
