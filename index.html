@@ -1221,10 +1221,14 @@
 
   // ===== 관리자 우회: ?report_id=7K4M&admin=관리자코드 로 접속하면 자동 진입 =====
   if (prefilledId && adminCodeParam) {
+    // 응답을 기다리지 않고 즉시 로그인 화면을 가려서, 확인 버튼이 보이는 순간 자체를 없앤다
+    document.getElementById('loginCard').style.display = 'none';
     callBackend({ report_id: prefilledId, admin_code: adminCodeParam }).then(data => {
       if (data.success) {
         showResult(data);
       } else {
+        // 실패 시에만 다시 로그인 화면을 보여줌
+        document.getElementById('loginCard').style.display = 'block';
         messageEl.textContent = data.message || '관리자 우회 실패';
         messageEl.className = 'message error';
       }
