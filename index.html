@@ -4,24 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>자문보고서 열람 | NETAX</title>
+<title>관리자 대시보드 | NETAX</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
-<!-- KaTeX: 수식 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-<!-- Chart.js: 원형·꺾은선·막대 차트 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<!-- Prism.js: 코드 하이라이팅 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --navy: #0D1B3D;
@@ -30,6 +15,7 @@
     --gold: #C8A244;
     --gold-light: #DCC17E;
     --error: #B14545;
+    --ok: #5BA968;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,11 +24,12 @@
   body {
     font-family: 'Noto Sans KR', sans-serif;
     background: var(--navy-deep);
-    background-image:
-      radial-gradient(circle at 20% 20%, rgba(176,141,87,0.08), transparent 45%),
-      radial-gradient(circle at 80% 80%, rgba(176,141,87,0.06), transparent 45%);
-    color: var(--cream);
-    min-height: 100dvh;
+    min-height: 100vh;
+  }
+
+  /* ---------- 로그인 화면 (기존 보고서관리 방식 그대로) ---------- */
+  #loginScreen {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,11 +38,11 @@
 
   .card {
     width: 100%;
-    max-width: 420px;
+    max-width: 480px;
     background: var(--navy);
     border: 1px solid rgba(176,141,87,0.25);
     border-radius: 4px;
-    padding: 48px 36px;
+    padding: 40px 32px;
     position: relative;
   }
 
@@ -68,81 +55,35 @@
     border-radius: 4px 4px 0 0;
   }
 
-  .card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--gold-light), var(--gold), var(--gold-light));
-    border-radius: 0 0 4px 4px;
-  }
-
   h1 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 27px;
-    font-weight: 700;
-    text-align: center;
-    letter-spacing: 0.02em;
-    margin-bottom: 22px;
-    color: var(--cream);
-  }
-
-  h1::after {
-    content: '';
-    display: block;
-    width: 48px;
-    height: 2px;
-    background: var(--gold);
-    margin: 22px auto 0;
-  }
-
-  .footer-highlight .highlight-strong {
     font-family: 'Nanum Myeongjo', serif;
-    color: var(--gold-light);
+    font-size: 22px;
     font-weight: 800;
-    font-size: 20px;
-  }
-
-  .footer-highlight {
-    margin-top: 8px;
-    margin-bottom: 32px;
-    font-size: 15px;
     color: var(--cream);
     text-align: center;
-    line-height: 1.75;
+    margin-bottom: 24px;
   }
 
-  .footer-highlight .highlight {
-    font-family: 'Noto Serif KR', serif;
-    color: var(--gold-light);
-    font-weight: 600;
+  @media (max-width: 480px) {
+    #loginScreen { padding: 0; align-items: stretch; }
+    .card {
+      max-width: 100%;
+      min-height: 100dvh;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 36px 20px 20px;
+    }
+    .card::before { border-radius: 0; }
+    h1 { font-size: 19px; }
   }
 
-  #introDynamicText.setup-notice {
-    color: var(--gold-light);
-    font-weight: 700;
-  }
+  .field-row { display: flex; gap: 8px; margin-bottom: 8px; }
 
-  .field-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .field-row input {
+  input[type="password"],
+  input[type="text"] {
     flex: 1;
     min-width: 0;
-  }
-
-  .field-row button {
-    width: auto;
-    white-space: nowrap;
-    padding: 0 22px;
-    margin-top: 0;
-  }
-
-  input[type="text"],
-  input[type="password"] {
     width: 100%;
     padding: 13px 14px;
     background: rgba(255,255,255,0.09);
@@ -152,1260 +93,617 @@
     font-size: 15px;
     font-family: 'Noto Sans KR', sans-serif;
     text-align: center;
-    transition: border-color 0.15s ease, background 0.15s ease;
   }
-
   input::placeholder { color: rgba(246,243,236,0.55); font-size: 12px; }
-
-  input:focus {
-    outline: none;
-    border-color: var(--gold);
-    background: rgba(255,255,255,0.06);
-  }
+  input:focus { outline: none; border-color: var(--gold); background: rgba(255,255,255,0.06); }
 
   button {
-    width: 100%;
-    padding: 14px;
-    margin-top: 8px;
     background: var(--gold);
     color: var(--navy-deep);
     border: none;
     border-radius: 3px;
     font-size: 15px;
     font-weight: 700;
-    font-family: 'Noto Sans KR', sans-serif;
     cursor: pointer;
-    transition: background 0.15s ease, transform 0.1s ease;
-    letter-spacing: 0.02em;
   }
+  button:hover { background: var(--gold-light); }
+  button:disabled { opacity: 0.5; cursor: default; }
 
-  button:hover:not(:disabled) { background: var(--gold-light); }
-  button:active:not(:disabled) { transform: scale(0.99); }
+  #loginScreen button[type="submit"] { padding: 0 22px; white-space: nowrap; }
 
-  button:disabled {
-    background: rgba(255,255,255,0.08);
-    color: rgba(246,243,236,0.4);
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .message {
-    margin-top: 8px;
-    font-size: 13px;
-    text-align: center;
-    line-height: 1.6;
-    min-height: 0;
-  }
-
+  .message { margin-top: 8px; font-size: 13px; text-align: center; line-height: 1.6; }
   .message.error { color: var(--error); }
 
-  /* ===== 열람 화면 ===== */
-  .viewer {
-    display: none;
-    width: 100%;
-    max-width: 960px;
-    height: 100dvh;
-    max-height: 900px;
-    flex-direction: column;
-    background: var(--cream);
-    border-radius: 4px;
-    overflow: hidden;
-  }
+  /* ---------- 로그인 후 대시보드 ---------- */
+  #dashboard { display: none; }
 
-  /* 시트 "권한" 열이 차단인 경우: 복사/드래그 선택 방지 및 인쇄 시 안내문만 표시 */
-  .viewer.protected .md-content {
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  @media print {
-    .viewer.protected .md-content {
-      display: none;
-    }
-    .viewer.protected .viewer-frame-wrap::after {
-      content: '이 문서는 인쇄가 제한되어 있습니다. NETAX 자문용역보고서';
-      display: block;
-      padding: 60px;
-      font-size: 16px;
-      text-align: center;
-      color: #333;
-    }
-  }
-
-  .viewer-header {
+  .topbar {
     background: var(--navy);
-    padding: 18px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
+    border-bottom: 1px solid rgba(176,141,87,0.25);
+    padding: 16px 0;
+    position: sticky; top: 0; z-index: 50;
   }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; }
+  .topbar h1 { margin: 0; text-align: left; font-size: 19px; white-space: nowrap; }
+  .logout-btn { background: transparent; border: 1px solid rgba(246,243,236,0.3); color: rgba(246,243,236,0.75); padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 3px; white-space: nowrap; }
+  .logout-btn:hover { background: rgba(255,255,255,0.06); color: var(--cream); }
 
-  .viewer-header .greeting {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 15px;
-    color: var(--cream);
-  }
-
-  .viewer-header .greeting span { color: var(--gold-light); }
-
-  .expiry-logo {
-    height: 16px;
-    opacity: 0.9;
-  }
-
-  .viewer-header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  #fullscreenBtn {
-    width: auto;
-    padding: 6px 12px;
-    margin-top: 0;
-    font-size: 11px;
-    background: rgba(255,255,255,0.1);
-    color: var(--cream);
-    font-weight: 500;
-  }
-
-  #fullscreenBtn:hover { background: rgba(255,255,255,0.18); }
-
-  /* 폰 화면: 헤더에서 인사말만 숨기고, 로고와 버튼은 유지 */
-  @media (max-width: 480px), (max-height: 500px) {
-    .viewer-header {
-      padding: 6px 14px;
-      justify-content: space-between;
-    }
-    .viewer-header .greeting {
-      display: none;
-    }
-    .expiry-logo {
-      height: 14px;
-    }
-    #fullscreenBtn {
-      padding: 3px 10px;
-      font-size: 16px;
-      line-height: 1.2;
-    }
-    #fullscreenBtn .btn-label {
-      display: none;
-    }
-    .viewer-header-right {
-      gap: 10px;
-      flex: 1;
-      justify-content: space-between;
-    }
-
-    #fullscreenBtn {
-      background: rgba(255,255,255,0.16);
-      border: 1px solid rgba(255,255,255,0.22);
-    }
-
-    /* 보고서 본문: 표/제목이 좁은 화면에서도 형태를 유지하도록 글씨 축소 */
-    .md-content {
-      padding: 20px 14px 60px;
-      font-size: 13px;
-      line-height: 1.55;
-    }
-    .md-content h1 { font-size: 18px; padding-bottom: 10px; }
-    .md-content h2 { font-size: 15px; padding: 8px 10px; margin: 26px 0 10px; }
-    .md-content h3 { font-size: 13.5px; }
-    .compare-label, .compare-value { width: 64px; font-size: 11.5px; }
-  }
-
-  .viewer-frame-wrap {
-    flex: 1;
-    background: #fff;
-    overflow-y: auto;
-  }
-
-  .md-content {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 40px 32px 80px;
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #22303F;
-    line-height: 1.8;
-    font-size: 15.5px;
-    overflow-wrap: break-word;
-    word-break: keep-all;
-  }
-
-  .md-content h1 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--navy);
-    text-align: left;
-    letter-spacing: normal;
-    margin: 0 0 8px;
-    padding-bottom: 14px;
-    border-bottom: 3px solid var(--gold);
-    max-width: 100%;
-    overflow-wrap: break-word;
-    word-break: keep-all;
-  }
-
-  .md-content h1::after { display: none; }
-
-  .md-content h2 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 19px;
-    font-weight: 700;
-    color: var(--navy);
-    margin: 34px 0 12px;
-    padding: 10px 14px;
-    background: linear-gradient(90deg, rgba(200,162,68,0.22), rgba(200,162,68,0.04));
-    border-left: 4px solid var(--gold);
-    border-bottom: 2px solid var(--gold);
-  }
-
-  .md-content h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--navy);
-    margin: 24px 0 10px;
-  }
-
-  .md-content p { margin: 0 0 14px; }
-
-  .md-content strong {
-    color: var(--navy);
-    background: linear-gradient(transparent 60%, rgba(200,162,68,0.28) 60%);
-    font-weight: 700;
-  }
-
-  .md-content ul, .md-content ol {
-    margin: 0 0 14px;
-    padding-left: 0;
-    list-style: none;
-  }
-
-  .md-content li { margin-bottom: 6px; }
-
-  .md-content .table-scroll {
-    position: relative;
-    overflow-x: auto;
-    margin: 8px 0 24px;
-  }
-
-  /* 스크롤 힌트: 스크롤바가 위치하는 하단 모서리에 배치, 스크롤 위치에 따라 좌/우 독립적으로 표시 */
-  .md-content .table-scroll.scrollable::after,
-  .md-content .table-scroll.scrollable::before {
-    position: absolute;
-    bottom: 3px;
-    color: rgba(200, 162, 68, 0.6);
-    font-size: 13px;
-    pointer-events: none;
-    text-shadow: -1px 0 3px rgba(255,255,255,0.9), 1px 0 3px rgba(255,255,255,0.9);
-    transition: opacity 0.15s ease;
-    opacity: 0;
-  }
-  .md-content .table-scroll.scrollable::after { content: '▸'; right: 3px; }
-  .md-content .table-scroll.scrollable::before { content: '◂'; left: 3px; }
-  .md-content .table-scroll.scrollable.show-right::after { opacity: 1; }
-  .md-content .table-scroll.scrollable.show-left::before { opacity: 1; }
-
-  .md-content table {
-    width: max-content;
-    max-width: none;
-    border-collapse: collapse;
-    margin: 0;
-    font-size: 14px;
-  }
-
-  .md-content th {
-    background: #4A6080;
-    color: #F5F2EC;
-    padding: 10px 12px;
-    text-align: left;
-    font-weight: 600;
-  }
-
-  .md-content td {
-    padding: 9px 12px;
-    border-bottom: 1px solid #E4E0D8;
-  }
-
-  .md-content tr:nth-child(even) td { background: #FAF8F3; }
-
-  /* 10번: 체크/X 이모지 열은 중앙정렬 텍스트로만 — 이미지 글머리 남발 방지 */
-  .md-content td:only-child,
-  .md-content th:only-child { text-align: center; }
-
-  .md-content blockquote {
-    margin: 0 0 8px;
-    padding: 12px 16px;
-    background: #F5F1E8;
-    color: #4A4A4A;
-    word-break: keep-all;
-    overflow-wrap: break-word;
-  }
-  /* 7번: 화살표(→) 앞에서 줄넘김 허용 */
-  /* blockquote 안 p의 기본 하단 마진(14px) 제거 — padding과 중복되어 박스가 불필요하게 커지는 문제 방지 */
-  .md-content blockquote p {
-    white-space: normal;
-    margin: 0;
-  }
-
-  /* 5·6번: hanging indent 제거 — 줄넘김은 항목 앞에서 자연스럽게 */
-  .md-content p { text-indent: 0; padding-left: 0; }
-  .md-content td { text-indent: 0; padding-left: 12px; }
-
-  /* 금액 열 정렬: 추후 별도 지시에 따라 적용 */
-
-  /* ===== KaTeX 수식 — 모바일 화면 너비 초과 시 가로 스크롤 처리 ===== */
-  .md-content .katex-display {
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 4px 2px 8px;
-    margin: 8px 0 16px;
-    max-width: 100%;
-  }
-  .md-content .katex {
-    font-size: 1em;
-  }
   @media (max-width: 480px) {
-    .md-content .katex-display {
-      font-size: 0.85em;
-    }
-    .md-content .katex-display > .katex {
-      white-space: normal;
-    }
-    /* 모바일 본문 행간·폰트 축소 — 넓은 행간으로 인한 스크롤 과다 방지 */
-    .md-content {
-      font-size: 14.5px;
-      line-height: 1.55;
-    }
-    .md-content p,
-    .md-content li,
-    .md-content td,
-    .md-content blockquote {
-      line-height: 1.5;
-    }
-    .md-content h2 {
-      line-height: 1.4;
-    }
+    .topbar { padding: 12px 0; }
+    .topbar h1 { font-size: 15px; }
+    .logout-btn { font-size: 11px; padding: 6px 10px; }
+    .main-menu button { padding: 12px 8px; font-size: 13.5px; }
+    .menu-content { padding: 16px; }
+    .tabs { gap: 4px; }
+    .tabs button { padding: 10px 12px; font-size: 12.5px; }
   }
 
-  /* ===== Chart.js 차트 ===== */
-  .chart-wrapper {
-    margin: 12px 0 24px;
-    background: #FAFAF7;
-    border: 1px solid #E4E0D8;
-    border-radius: 8px;
-    padding: 20px;
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  .main-menu { display: flex; gap: 8px; margin: 28px 0 0; }
+  .main-menu button {
+    flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(176,141,87,0.2); border-bottom: none;
+    border-radius: 4px 4px 0 0; padding: 16px; font-size: 15px; font-weight: 700;
+    color: rgba(246,243,236,0.5); cursor: pointer; transition: .2s;
   }
-  .chart-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 14px;
-    text-align: center;
+  .main-menu button.active { color: var(--cream); background: var(--navy); border-bottom: 3px solid var(--gold); }
+
+  .menu-content {
+    display: none; background: var(--navy); border: 1px solid rgba(176,141,87,0.2); border-top: none;
+    padding: 28px; border-radius: 0 0 4px 4px; margin-bottom: 48px;
+  }
+  .menu-content.active { display: block; }
+
+  /* 예약관리 서브탭 */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.12); margin-bottom: 24px; }
+  .tabs button { background: none; border: none; border-radius: 0; padding: 12px 20px; font-size: 14px; font-weight: 600; color: rgba(246,243,236,0.5); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tabs button.active { color: var(--gold-light); border-bottom-color: var(--gold); background: none; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  h3 { font-family: 'Nanum Myeongjo', serif; color: var(--cream); font-size: 16px; font-weight: 700; text-align: left; margin: 0 0 4px; }
+
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0 32px; border-radius: 4px; }
+  .table-scroll table { margin: 0; }
+
+  table { width: 100%; min-width: 620px; border-collapse: collapse; }
+  table th { background: rgba(255,255,255,0.06); color: var(--gold-light); padding: 12px; text-align: left; font-weight: 600; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.15); white-space: nowrap; }
+  table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 14px; color: var(--cream); white-space: nowrap; }
+  table tr:hover td { background: rgba(255,255,255,0.03); }
+
+  @media (max-width: 480px) {
+    table { min-width: 560px; }
+    table th, table td { padding: 10px; font-size: 13px; }
   }
 
-  /* ===== 타임라인 ===== */
-  .timeline-chart {
-    margin: 12px 0 24px;
-    padding: 8px 0;
-    position: relative;
-  }
-  .timeline-chart::before {
-    content: '';
-    position: absolute;
-    left: 90px;
-    top: 0; bottom: 0;
-    width: 2px;
-    background: var(--gold);
-    opacity: 0.4;
-  }
-  .timeline-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 16px;
-    position: relative;
-  }
-  .timeline-dot {
-    position: absolute;
-    left: 84px;
-    top: 4px;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: var(--gold);
-    border: 2px solid var(--navy);
-    flex-shrink: 0;
-  }
-  .timeline-date {
-    width: 78px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--navy);
-    text-align: right;
-    flex-shrink: 0;
-    padding-top: 2px;
-  }
-  .timeline-label {
-    margin-left: 20px;
-    font-size: 13px;
-    color: #3A3A3A;
-    line-height: 1.6;
-  }
+  button.approve { background: var(--ok); color: #06210c; padding: 6px 12px; font-size: 12px; margin-right: 4px; }
+  button.approve:hover { background: #6fc57e; }
+  button.reject { background: var(--error); color: #fff; padding: 6px 12px; font-size: 12px; }
+  button.reject:hover { background: #c95c5c; }
 
-  /* 9번: blockquote 내 p 태그 앞 이모지 글머리 제거 — 이모지는 텍스트 그 자체로만 */
-  .md-content blockquote p { padding-left: 0; text-indent: 0; }
+  .loading, .empty-row { text-align: center; padding: 32px; color: rgba(246,243,236,0.45); }
 
-  /* ===== 목차 ===== */
-  .toc {
-    background: #F5F1E8;
-    border: 1px solid rgba(200,162,68,0.35);
-    border-radius: 8px;
-    padding: 18px 22px;
-    margin: 0 0 28px;
-  }
-  .toc-title {
-    font-family: 'Noto Serif KR', serif;
-    font-weight: 700;
-    color: var(--navy);
-    font-size: 14px;
+  .stats-box { margin: 16px 0; padding: 8px 20px; background: rgba(255,255,255,0.05); border-radius: 4px; color: var(--cream); font-size: 14px; }
+  .stat-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { color: rgba(246,243,236,0.6); }
+  .stat-value { color: var(--gold-light); font-weight: 700; font-size: 16px; }
+
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--navy); border: 1px solid var(--gold); color: var(--cream); padding: 16px 24px; border-radius: 4px; z-index: 1000; }
+
+  /* 보고서관리 (기존 화면 그대로) */
+  .search-box { margin-bottom: 16px; }
+  .customer-list { max-height: none; }
+
+  .customer-item {
+    display: block;
+    padding: 14px 16px;
     margin-bottom: 8px;
-    letter-spacing: 0.05em;
-  }
-  .toc ol {
-    margin: 0;
-    padding-left: 20px;
-  }
-  .toc li { margin-bottom: 4px; }
-  .toc a {
-    color: #2A3F63;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
     text-decoration: none;
-    font-size: 13.5px;
+    transition: background 0.15s ease, border-color 0.15s ease;
   }
-  .toc a:hover { text-decoration: underline; color: var(--navy); }
+  .customer-item:hover { background: rgba(255,255,255,0.11); border-color: var(--gold); }
 
-  /* ===== 알림 상자 색상 구분 ===== */
-  .md-content blockquote.callout-success {
-    background: #EAF7EE;
-    border: 1px solid #8FCB9F;
-  }
-  .md-content blockquote.callout-warning {
-    background: #FFF6E0;
-    border: 1px solid #E8C363;
-  }
-  .md-content blockquote.callout-danger {
-    background: #FCEBEB;
-    border: 1px solid #E29B9B;
-  }
-  .md-content blockquote.callout-info {
-    background: #E9F1FA;
-    border: 1px solid #9CC1E8;
-  }
+  .customer-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .customer-name { color: var(--cream); font-size: 16px; font-weight: 600; }
+  .customer-title { color: rgba(246,243,236,0.6); font-size: 13px; }
+  .customer-issued { color: rgba(246,243,236,0.45); font-size: 12px; }
 
-  /* ===== 숫자 비교 막대그래프 ===== */
-  .compare-chart {
-    margin: 8px 0 24px;
-    padding: 18px 20px;
-    background: #FAF8F3;
-    border-radius: 6px;
-  }
-  .compare-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-  .compare-row:last-child { margin-bottom: 0; }
-  .compare-label {
-    width: 90px;
-    flex-shrink: 0;
-    font-size: 13px;
-    color: #444;
-  }
-  .compare-track {
-    flex: 1;
-    background: #E4E0D8;
-    border-radius: 4px;
-    height: 18px;
-    overflow: hidden;
-  }
-  .compare-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #2A3F63, #0D1B3D);
-    border-radius: 4px;
-  }
-  .compare-value {
-    width: 90px;
-    flex-shrink: 0;
-    text-align: right;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--navy);
-  }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .badge-expired { background: rgba(177,69,69,0.25); color: #E68A8A; }
 
-  /* ===== 접고 펼치기 (details/summary) ===== */
-  .md-content details {
-    margin: 0 0 8px;
-    border: 1px solid #E4E0D8;
-    border-radius: 6px;
-    overflow: hidden;
+  .report-id-chip {
+    font-family: 'Courier New', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--gold-light); background: rgba(200,162,68,0.12); border: 1px solid rgba(200,162,68,0.4);
+    padding: 3px 10px; border-radius: 10px; cursor: pointer; white-space: nowrap; transition: .15s;
   }
-  .md-content summary {
-    cursor: pointer;
-    padding: 12px 16px;
-    background: #F5F1E8;
-    font-weight: 700;
-    color: var(--navy);
-    list-style: none;
-    word-break: keep-all;
-  }
-  /* 11번: 콜론 앞 스페이스 — summary 내 em dash나 콜론 앞 여백 자연스럽게 */
-  .md-content summary::after {
-    content: '';
-  }
-  .md-content summary::-webkit-details-marker { display: none; }
-  .md-content summary::before {
-    content: '▸ ';
-    color: var(--gold);
-  }
-  .md-content details[open] summary::before {
-    content: '▾ ';
-  }
-  .md-content details > *:not(summary) {
-    padding: 0 16px;
-  }
-  .md-content details p:last-child {
-    padding-bottom: 16px;
-  }
+  .report-id-chip:hover { background: rgba(200,162,68,0.22); }
+  .report-id-chip.copied { background: var(--ok); border-color: var(--ok); color: #06210c; }
 
-  .mermaid-diagram {
-    margin: 16px 0 24px;
-    padding: 16px;
-    background: #FAF8F3;
-    border-radius: 6px;
-    overflow-x: auto;
-    text-align: center;
-  }
+  .customer-meta { color: rgba(246,243,236,0.55); font-size: 12.5px; margin-top: 4px; }
 
-  .mermaid-diagram svg {
-    max-width: 100%;
-    min-width: min(420px, 100%);
-    height: auto;
-    display: block;
-    margin: 0 auto;
-  }
+  .empty-state { text-align: center; color: rgba(246,243,236,0.55); font-size: 14px; padding: 24px 0; }
 
-  /* Mermaid 노드 내부 텍스트 행간·크기 축소 — 박스 밖으로 삐져나오는 문제 방지 */
-  .mermaid-diagram svg .nodeLabel,
-  .mermaid-diagram svg .edgeLabel,
-  .mermaid-diagram svg foreignObject div,
-  .mermaid-diagram svg foreignObject span {
-    font-size: 12.5px !important;
-    line-height: 1.25 !important;
+  /* ---------- 보고서 열람 모달 ---------- */
+  .report-modal { display: none; position: fixed; inset: 0; z-index: 200; background: var(--navy-deep); flex-direction: column; }
+  .report-modal.active { display: flex; }
+  .report-modal-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 10px 16px; background: var(--navy); border-bottom: 1px solid rgba(176,141,87,0.25);
   }
-  .mermaid-diagram svg .label {
-    font-size: 12.5px !important;
+  .modal-back-btn {
+    background: transparent; border: 1px solid rgba(246,243,236,0.3); color: var(--cream);
+    padding: 8px 14px; font-size: 13px; font-weight: 700; border-radius: 3px; white-space: nowrap;
   }
-
-  .md-content hr {
-    border: none;
-    border-top: 1px solid #E4E0D8;
-    margin: 28px 0;
+  .modal-back-btn:hover { background: rgba(255,255,255,0.08); }
+  .report-modal-title { color: var(--cream); font-size: 14px; font-weight: 600; flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .modal-newtab-btn {
+    color: var(--gold-light); font-size: 12.5px; text-decoration: none;
+    border: 1px solid rgba(176,141,87,0.3); padding: 8px 12px; border-radius: 3px; white-space: nowrap;
   }
-
-  .viewer-frame-wrap iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
-
-  .footer-brand {
-    margin-top: 8px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .footer-logo {
-    height: 16px;
-    opacity: 0.85;
-    flex-shrink: 0;
-  }
-
-  .footer-divider {
-    width: 1px;
-    align-self: stretch;
-    background: rgba(255,255,255,0.12);
-  }
-
-  .footer-brand-text {
-    font-size: 13px;
-    color: var(--cream);
-    text-align: center;
-    line-height: 1.6;
-    letter-spacing: 0.02em;
-  }
-
-  @media (max-width: 1024px), (max-height: 1024px) {
-    body { padding: 0; align-items: stretch; }
-    .card {
-      max-width: 100%;
-      min-height: 100dvh;
-      border-radius: 0;
-      border-left: none;
-      border-right: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 36px 24px 16px;
-    }
-    .card::before, .card::after { border-radius: 0; }
-    #loginCard h1 { font-size: 21px; }
-
-    .viewer {
-      max-width: 100%;
-      max-height: none;
-      height: 100dvh;
-      border-radius: 0;
-    }
-  }
+  .modal-newtab-btn:hover { background: rgba(255,255,255,0.06); }
+  .report-modal-frame { flex: 1; width: 100%; border: none; background: #fff; }
 </style>
 </head>
 <body>
 
-  <!-- 로그인 카드 -->
-  <div class="card" id="loginCard">
-    <h1>Consulting Report</h1>
+<!-- ===================== 로그인 화면 (기존 보고서관리 인증방식) ===================== -->
+<div id="loginScreen">
+  <div class="card">
+    <h1>관리자 대시보드</h1>
 
-    <p class="footer-highlight">이 <span class="highlight-strong">자문용역 보고서</span> 는<br>고객님을 위해 <span class="highlight">맞춤형</span>으로<br>종이문서가 아닌 <span class="highlight">전용 페이지</span>로<br>특별히 제작하여<br>드리는 문서입니다.<br>스마트기기로 언제 어디서든<br>열람하실 수 있습니다.<br><span id="introDynamicText">열람가능 기간은<br>발급일로부터 30일입니다.</span></p>
-
-    <form id="idForm">
+    <form id="adminForm">
       <div class="field-row">
-        <input type="text" id="reportId" placeholder="예: 7K4M" aria-label="열람번호" autocomplete="off" maxlength="4" style="text-transform:uppercase;" required>
-        <button type="submit" id="idSubmitBtn">확인</button>
+        <input type="text" id="adminCode" placeholder="관리자 비밀번호" aria-label="관리자 비밀번호" autocomplete="off" required>
+        <button type="submit" id="submitBtn">확인</button>
       </div>
     </form>
 
-    <form id="passwordForm" style="display:none;">
-      <div class="field-row" id="passwordRow">
-        <input type="password" id="password" placeholder="비밀번호" aria-label="비밀번호" autocomplete="off" required>
-        <button type="submit" id="submitBtn">열람하기</button>
-      </div>
-    </form>
+    <div id="message" class="message"></div>
+  </div>
+</div>
 
-    <div class="message" id="message"></div>
+<!-- ===================== 로그인 후 대시보드 ===================== -->
+<div id="dashboard">
 
-    <div class="footer-brand">
-      <img src="netax-wordmark.png" alt="NETAX" class="footer-logo">
-      <div class="footer-divider"></div>
-      <div class="footer-brand-text">이음세무컨설팅<br>조종호 세무사</div>
+  <div class="topbar">
+    <div class="wrap">
+      <h1>NETAX Admin</h1>
+      <button class="logout-btn" onclick="logout()">로그아웃</button>
     </div>
   </div>
 
-  <!-- 열람 화면 -->
-  <div class="viewer" id="viewer">
-    <div class="viewer-header" id="viewerHeader">
-      <div class="greeting"><span id="customerName"></span> 고객님, 자문용역보고서</div>
-      <div class="viewer-header-right">
-        <img src="netax-wordmark.png" alt="NETAX" class="expiry-logo">
-        <button type="button" id="fullscreenBtn" title="전체화면으로 보기">⤢ <span class="btn-label">전체화면</span></button>
+  <div class="wrap">
+    <div class="main-menu">
+      <button class="menu-btn active" onclick="switchMenu(0)">예약관리</button>
+      <button class="menu-btn" onclick="switchMenu(1)">보고관리</button>
+    </div>
+
+    <!-- ===================== 메뉴 0: 예약관리 ===================== -->
+    <div id="menu0" class="menu-content active">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(0)">상담신청 관리</button>
+        <button class="tab-btn" onclick="switchTab(1)">통계</button>
+      </div>
+
+      <div id="tab0" class="tab-content active">
+        <h3>상담신청 대기</h3>
+        <div class="table-scroll">
+          <table id="pending-table">
+            <thead>
+              <tr>
+                <th>신청자</th>
+                <th>전화</th>
+                <th>유형</th>
+                <th>신청일</th>
+                <th>상황</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody id="pending-tbody">
+              <tr><td colspan="6" class="loading">로딩 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>상담신청 완료</h3>
+        <div class="table-scroll">
+          <table id="approved-table">
+            <thead>
+              <tr>
+                <th>신청자</th>
+                <th>전화</th>
+                <th>신청일</th>
+                <th>확정일</th>
+                <th>예약일</th>
+              </tr>
+            </thead>
+            <tbody id="approved-tbody">
+              <tr><td colspan="5" class="loading">로딩 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab1" class="tab-content">
+        <h3>상담신청 통계</h3>
+        <div id="stats-info" class="stats-box"></div>
       </div>
     </div>
-    <div class="viewer-frame-wrap">
-      <iframe id="materialFrame" title="자문보고서" style="display:none;"></iframe>
-      <div id="materialContent" class="md-content" style="display:none;"></div>
+
+    <!-- ===================== 메뉴 1: 보고서관리 ===================== -->
+    <div id="menu1" class="menu-content">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="고객명 검색">
+      </div>
+      <div class="customer-list" id="customerList"></div>
     </div>
   </div>
+
+</div>
+
+<!-- ===================== 보고서 열람 모달 ===================== -->
+<div id="reportModal" class="report-modal">
+  <div class="report-modal-bar">
+    <button class="modal-back-btn" onclick="closeReportModal()">← 목록으로</button>
+    <span id="reportModalTitle" class="report-modal-title"></span>
+    <a id="reportModalNewTab" class="modal-newtab-btn" href="#" target="_blank" rel="noopener">새 탭에서 열기 ↗</a>
+  </div>
+  <iframe id="reportModalFrame" class="report-modal-frame" src="about:blank" title="보고서 열람"></iframe>
+</div>
+
+<div id="toast-msg" class="toast" style="display: none;"></div>
 
 <script>
-  // ===== 설정 =====
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyg0gDbzPPkpZs2Gnsuw7Qh_qszYy1_8f2Q-SN7Ffreoc3GfHzIZ7B5UXNidT5ale_b/exec';
+/* =========================================================
+   공통: 인증 (기존 보고서관리 방식 — 최상위 1회)
+   ========================================================= */
+const REPORT_API_URL = 'https://script.google.com/macros/s/AKfycbyg0gDbzPPkpZs2Gnsuw7Qh_qszYy1_8f2Q-SN7Ffreoc3GfHzIZ7B5UXNidT5ale_b/exec';
+const BOOKING_API_URL = 'https://script.google.com/macros/s/AKfycbxJNuDRHaElDL5lVcUFzd5fxAagH4Ql7Jtpcnhhc3_tvh8qfOD3LLcI660DkFIbrwoW4A/exec';
 
-  // URL에 ?report_id=7K4M 형태로 넘어오면 자동 채움
-  const urlParams = new URLSearchParams(window.location.search);
-  const prefilledId = urlParams.get('report_id') ? formatReportId(urlParams.get('report_id')).toUpperCase() : '';
-  const adminCodeParam = urlParams.get('admin');
-  if (prefilledId) document.getElementById('reportId').value = prefilledId;
+const adminForm = document.getElementById('adminForm');
+const submitBtn = document.getElementById('submitBtn');
+const messageEl = document.getElementById('message');
 
-  async function sha256(text) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(text);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
+let allCustomers = [];
+let allBookingData = [];
+let currentAdminCode = '';
 
-  function toEmbedUrl(link) {
-    // 구글 드라이브/문서/슬라이드 링크는 /preview 형태여야 iframe 임베드가 잘 됩니다.
-    if (link.includes('/edit')) return link.replace(/\/edit.*$/, '/preview');
-    if (link.includes('/view')) return link.replace(/\/view.*$/, '/preview');
-    return link;
-  }
+adminForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const password = document.getElementById('adminCode').value;
+  submitBtn.disabled = true;
+  messageEl.textContent = '';
+  messageEl.className = 'message';
 
-  const idForm = document.getElementById('idForm');
-  const idSubmitBtn = document.getElementById('idSubmitBtn');
-  const passwordForm = document.getElementById('passwordForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const messageEl = document.getElementById('message');
-  const passwordInput = document.getElementById('password');
-  const introDynamicText = document.getElementById('introDynamicText');
-
-  let currentReportId = '';
-
-  async function callBackend(payload) {
-    const res = await fetch(APPS_SCRIPT_URL, {
+  try {
+    const res = await fetch(REPORT_API_URL, {
       method: 'POST',
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ action: 'admin_list', admin_code: password })
     });
-    return res.json();
-  }
+    const data = await res.json();
 
-  // ===== KaTeX 수식 렌더링 =====
-  // 문법: 인라인 수식 $수식$, 블록 수식 $$수식$$
-  function renderKatex(container) {
-    if (!window.renderMathInElement) return;
-    renderMathInElement(container, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$',  right: '$',  display: false },
-      ],
-      throwOnError: false,
-      output: 'html',
-    });
-  }
-
-  // ===== Chart.js 차트 렌더링 =====
-  // 문법: ```chart
-  // type: pie | line | bar | doughnut | radar
-  // title: 차트 제목
-  // labels: 항목1, 항목2, 항목3
-  // data: 10, 20, 30
-  // colors: #색1, #색2, #색3  (선택)
-  // ```
-  function renderChartBlocks(container) {
-    if (!window.Chart) return;
-    const blocks = container.querySelectorAll('code.language-chart');
-    let chartIdx = 0;
-    blocks.forEach(block => {
-      chartIdx++;
-      const lines = block.textContent.trim().split('\n');
-      const cfg = {};
-      lines.forEach(l => {
-        const m = l.match(/^(\w+)\s*:\s*(.+)$/);
-        if (m) cfg[m[1].trim().toLowerCase()] = m[2].trim();
-      });
-
-      const type    = cfg.type    || 'bar';
-      const title   = cfg.title   || '';
-      const labels  = (cfg.labels || '').split(',').map(s => s.trim());
-      const data    = (cfg.data   || '').split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-      const defaultColors = ['#0D1B3D','#C8A244','#4A6080','#8BA3C7','#D4A96A','#6B8E9F','#2A3F63','#E8D5A3'];
-      const colors  = cfg.colors
-        ? cfg.colors.split(',').map(s => s.trim())
-        : defaultColors.slice(0, data.length);
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'chart-wrapper';
-      if (title) {
-        const h = document.createElement('div');
-        h.className = 'chart-title';
-        h.textContent = title;
-        wrapper.appendChild(h);
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.id = 'netax-chart-' + chartIdx;
-      canvas.style.maxHeight = '320px';
-      wrapper.appendChild(canvas);
-      block.closest('pre').replaceWith(wrapper);
-
-      new Chart(canvas, {
-        type,
-        data: {
-          labels,
-          datasets: [{
-            data,
-            backgroundColor: colors,
-            borderColor: type === 'line' ? colors[0] : colors,
-            borderWidth: type === 'line' ? 2 : 1,
-            fill: type === 'line' ? false : undefined,
-            tension: 0.3,
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: ['pie','doughnut','radar'].includes(type) },
-            title: { display: false },
-          },
-          scales: ['pie','doughnut','radar'].includes(type) ? {} : {
-            y: { beginAtZero: true, ticks: { font: { family: "'Noto Sans KR'" } } },
-            x: { ticks: { font: { family: "'Noto Sans KR'" } } },
-          },
-        }
-      });
-    });
-  }
-
-  // ===== Prism.js 코드 하이라이팅 =====
-  // 문법: ```js, ```python, ```sql 등 일반 코드블록
-  function renderPrismBlocks(container) {
-    if (!window.Prism) return;
-    Prism.highlightAllUnder(container);
-  }
-
-  // ===== 타임라인 렌더링 =====
-  // 문법: ```timeline
-  // 2015.01 : 201호 취득
-  // 2021.03 : 이혼·합가
-  // 2026.07 : 매매 예정
-  // ```
-  function renderTimelineBlocks(container) {
-    const blocks = container.querySelectorAll('code.language-timeline');
-    blocks.forEach(block => {
-      const lines = block.textContent.trim().split('\n').filter(l => l.includes(':'));
-      const wrapper = document.createElement('div');
-      wrapper.className = 'timeline-chart';
-      lines.forEach(l => {
-        const idx = l.indexOf(':');
-        const date  = l.slice(0, idx).trim();
-        const label = l.slice(idx + 1).trim();
-        wrapper.innerHTML += `
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-date">${date}</div>
-            <div class="timeline-label">${label}</div>
-          </div>`;
-      });
-      block.closest('pre').replaceWith(wrapper);
-    });
-  }
-
-  // Mermaid 다이어그램을 NETAX 브랜드 컬러로 초기화
-  if (window.mermaid) {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'base',
-      themeVariables: {
-        primaryColor: '#0D1B3D',
-        primaryTextColor: '#F8F6F0',
-        primaryBorderColor: '#C8A244',
-        lineColor: '#C8A244',
-        secondaryColor: '#2A3F63',
-        tertiaryColor: '#F5F1E8',
-        fontFamily: "'Noto Sans KR', sans-serif",
-        fontSize: '13px',
-      },
-      flowchart: {
-        htmlLabels: true,
-        nodeSpacing: 24,
-        rankSpacing: 36,
-        padding: 8,
-        curve: 'basis',
-      },
-    });
-  }
-
-  // 마크다운 안의 ```mermaid 코드블록을 실제 도식으로 변환
-  async function renderMermaidBlocks(container) {
-    if (!window.mermaid) return;
-    const blocks = container.querySelectorAll('code.language-mermaid');
-    let i = 0;
-    for (const block of blocks) {
-      i++;
-      try {
-        const { svg } = await mermaid.render('mermaid-diagram-' + i, block.textContent);
-        const wrapper = document.createElement('div');
-        wrapper.className = 'mermaid-diagram';
-        wrapper.innerHTML = svg;
-        block.closest('pre').replaceWith(wrapper);
-      } catch (err) {
-        // 문법 오류 시 원본 코드블록 그대로 유지
-      }
-    }
-  }
-
-  // ===== 각주 처리: [^1] 형식을 실제 각주로 변환 =====
-  function preprocessFootnotes(mdText) {
-    const defs = {};
-    const order = [];
-    // 각주 정의 줄 [^1]: 내용  을 찾아서 제거하고 저장
-    mdText = mdText.replace(/^\[\^([^\]]+)\]:\s*(.+)$/gm, (m, id, def) => {
-      defs[id] = def;
-      return '';
-    });
-    if (Object.keys(defs).length === 0) return mdText;
-
-    // 본문 중 [^1] 참조를 위첨자 링크로 변환
-    mdText = mdText.replace(/\[\^([^\]]+)\]/g, (m, id) => {
-      if (!(id in defs)) return m;
-      if (!order.includes(id)) order.push(id);
-      const num = order.indexOf(id) + 1;
-      return `<sup id="fnref-${id}"><a href="#fn-${id}">[${num}]</a></sup>`;
-    });
-
-    if (order.length > 0) {
-      let footnoteSection = '\n\n## 각주\n\n';
-      order.forEach((id, i) => {
-        footnoteSection += `${i + 1}. <span id="fn-${id}">${defs[id]}</span> <a href="#fnref-${id}">↩</a>\n`;
-      });
-      mdText += footnoteSection;
-    }
-    return mdText;
-  }
-
-  // ===== 숫자 비교 막대그래프: ```compare 코드블록을 그래프로 변환 =====
-  function renderCompareBars(container) {
-    const blocks = container.querySelectorAll('code.language-compare');
-    blocks.forEach(block => {
-      const lines = block.textContent.trim().split('\n').filter(l => l.includes(':'));
-      const items = lines.map(l => {
-        const idx = l.lastIndexOf(':');
-        return { label: l.slice(0, idx).trim(), value: parseFloat(l.slice(idx + 1).replace(/,/g, '').trim()) };
-      }).filter(it => !isNaN(it.value));
-      if (items.length === 0) return;
-
-      const max = Math.max(...items.map(it => it.value));
-      const wrapper = document.createElement('div');
-      wrapper.className = 'compare-chart';
-      items.forEach(it => {
-        const pct = max > 0 ? (it.value / max * 100) : 0;
-        const row = document.createElement('div');
-        row.className = 'compare-row';
-        row.innerHTML = `
-          <div class="compare-label">${it.label}</div>
-          <div class="compare-track"><div class="compare-fill" style="width:${pct}%"></div></div>
-          <div class="compare-value">${it.value.toLocaleString()}</div>
-        `;
-        wrapper.appendChild(row);
-      });
-      block.closest('pre').replaceWith(wrapper);
-    });
-  }
-
-  // ===== 표 스크롤 힌트: 실제로 화면보다 넓어 스크롤이 필요한 표에만, 스크롤 위치에 따라 좌/우 화살표 표시 =====
-  function updateScrollHint(el) {
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    el.classList.toggle('show-right', el.scrollLeft < maxScroll - 2);
-    el.classList.toggle('show-left', el.scrollLeft > 2);
-  }
-
-  function markScrollableTables(container) {
-    container.querySelectorAll('.table-scroll').forEach(el => {
-      if (el.scrollWidth > el.clientWidth + 1) {
-        const isNew = !el.classList.contains('scrollable');
-        el.classList.add('scrollable');
-        updateScrollHint(el);
-        if (isNew) el.addEventListener('scroll', () => updateScrollHint(el));
-      }
-    });
-  }
-
-  // ===== 알림 상자 색상 구분: 인용문 첫 글자(이모지)로 판별해 색상만 부여하고, 이모지 글자 자체는 화면에서 제거 =====
-  function applyCalloutColors(container) {
-    const quotes = container.querySelectorAll('blockquote');
-    quotes.forEach(bq => {
-      const text = bq.textContent.trim();
-      let cls = null, stripRe = null;
-      if (text.startsWith('✅')) { cls = 'callout-success'; stripRe = /^✅\s*/; }
-      else if (text.startsWith('⚠️') || text.startsWith('⚠')) { cls = 'callout-warning'; stripRe = /^⚠️?\s*/; }
-      else if (text.startsWith('❌') || text.startsWith('🚫')) { cls = 'callout-danger'; stripRe = /^(❌|🚫)\s*/; }
-      else if (text.startsWith('ℹ️') || text.startsWith('ℹ')) { cls = 'callout-info'; stripRe = /^ℹ️?\s*/; }
-      if (!cls) return;
-      bq.classList.add(cls);
-      // 판별에 쓴 이모지는 표시 텍스트에서만 제거 (판별 로직은 원본 이모지에 의존하므로 마크다운 원문은 그대로 유지)
-      const walker = document.createTreeWalker(bq, NodeFilter.SHOW_TEXT);
-      const firstTextNode = walker.nextNode();
-      if (firstTextNode) {
-        firstTextNode.textContent = firstTextNode.textContent.replace(stripRe, '');
-      }
-    });
-  }
-
-  // ===== 목차 자동 생성: h2(장 제목) 기준으로 상단에 네비게이션 삽입 =====
-  function buildTableOfContents(container) {
-    // 1번: "기본 사실관계" 등 머리말 h2는 목차에서 제외 — 텍스트 내용으로 필터링
-    const EXCLUDE_HEADINGS = ['기본 사실관계'];
-    const headings = Array.from(container.querySelectorAll('h2')).filter(h => {
-      const text = h.textContent.trim();
-      return !EXCLUDE_HEADINGS.some(ex => text.startsWith(ex));
-    });
-    if (headings.length < 2) return;
-
-    const toc = document.createElement('nav');
-    toc.className = 'toc';
-    let tocHtml = '<div class="toc-title">목차</div><ul>';
-    headings.forEach((h, i) => {
-      const id = 'section-' + i;
-      h.id = id;
-      const label = h.textContent.trim();
-      tocHtml += `<li><a href="#${id}">${label}</a></li>`;
-    });
-    tocHtml += '</ul>';
-    toc.innerHTML = tocHtml;
-
-    const firstH1 = container.querySelector('h1');
-    if (firstH1) {
-      firstH1.after(toc);
-    } else {
-      container.prepend(toc);
-    }
-  }
-
-  function showResult(data) {
-    document.getElementById('customerName').textContent = data.customer_name;
-    const frame = document.getElementById('materialFrame');
-    const contentEl = document.getElementById('materialContent');
-    const viewerEl = document.getElementById('viewer');
-
-    // 권한 "차단"이면 인쇄/복사/드래그 선택 방지
-    if (data.download_allowed === false) {
-      viewerEl.classList.add('protected');
-    } else {
-      viewerEl.classList.remove('protected');
-    }
-
-    if (data.report_content) {
-      // 마크다운 원문을 브랜드 스타일로 직접 렌더링
-      frame.style.display = 'none';
-      contentEl.style.display = 'block';
-      const processedMd = preprocessFootnotes(data.report_content);
-      let renderedHtml = marked.parse(processedMd);
-      renderedHtml = renderedHtml
-        .replace(/<table>/g, '<div class="table-scroll"><table>')
-        .replace(/<\/table>/g, '</table></div>');
-      contentEl.innerHTML = renderedHtml;
-      renderMermaidBlocks(contentEl);
-      renderCompareBars(contentEl);
-      renderChartBlocks(contentEl);
-      renderTimelineBlocks(contentEl);
-      renderPrismBlocks(contentEl);
-      renderKatex(contentEl);
-      applyCalloutColors(contentEl);
-      buildTableOfContents(contentEl);
-    } else {
-      // 기존 방식: 구글 드라이브 파일을 iframe으로 표시
-      contentEl.style.display = 'none';
-      frame.style.display = 'block';
-      if (data.material_link.startsWith('srcdoc:')) {
-        frame.removeAttribute('src');
-        frame.srcdoc = data.material_link.slice(7);
-      } else {
-        frame.removeAttribute('srcdoc');
-        frame.src = toEmbedUrl(data.material_link);
-      }
-    }
-
-    document.getElementById('loginCard').style.display = 'none';
-    document.getElementById('viewer').style.display = 'flex';
-
-    // 뷰어가 화면에 실제로 보이게 된 뒤에 측정해야 scrollWidth/clientWidth가 정확함
-    // (display:none 상태에서 재면 항상 0이라 넘침 감지가 안 됨)
-    if (data.report_content) {
-      markScrollableTables(contentEl);
-    }
-
-    // 스크롤 위치를 맨 위로 강제 초기화 (이전 위치나 브라우저 자동 스크롤 보정으로
-    // 중간부터 보이는 문제 방지). 비동기 렌더링(mermaid 등) 이후에도 한 번 더 보정.
-    const frameWrap = document.querySelector('.viewer-frame-wrap');
-    window.scrollTo(0, 0);
-    if (frameWrap) frameWrap.scrollTop = 0;
-    requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-      if (frameWrap) frameWrap.scrollTop = 0;
-    });
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-      if (frameWrap) frameWrap.scrollTop = 0;
-      if (data.report_content) markScrollableTables(contentEl);
-    }, 300);
-  }
-
-  document.getElementById('materialContent').addEventListener('contextmenu', (e) => {
-    if (document.getElementById('viewer').classList.contains('protected')) {
-      e.preventDefault();
-    }
-  });
-
-  document.getElementById('fullscreenBtn').addEventListener('click', () => {
-    const viewer = document.getElementById('viewer');
-    if (!document.fullscreenElement) {
-      (viewer.requestFullscreen || viewer.webkitRequestFullscreen)?.call(viewer);
-    } else {
-      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
-    }
-  });
-
-  // 전체화면 상태에 따라 버튼 아이콘·라벨 전환 (ESC로 빠져나가는 경우도 정확히 반영됨)
-  function updateFullscreenBtnLabel() {
-    const btn = document.getElementById('fullscreenBtn');
-    const isFullscreen = !!document.fullscreenElement;
-    btn.innerHTML = isFullscreen
-      ? '⤡ <span class="btn-label">기본보기</span>'
-      : '⤢ <span class="btn-label">전체화면</span>';
-    btn.title = isFullscreen ? '기본 화면으로 보기' : '전체화면으로 보기';
-  }
-  document.addEventListener('fullscreenchange', updateFullscreenBtnLabel);
-  document.addEventListener('webkitfullscreenchange', updateFullscreenBtnLabel);
-
-  // ===== 관리자 우회: ?report_id=7K4M&admin=관리자코드 로 접속하면 자동 진입 =====
-  if (prefilledId && adminCodeParam) {
-    // 응답을 기다리지 않고 즉시 로그인 화면을 가려서, 확인 버튼이 보이는 순간 자체를 없앤다
-    document.getElementById('loginCard').style.display = 'none';
-    callBackend({ report_id: prefilledId, admin_code: adminCodeParam }).then(data => {
-      if (data.success) {
-        showResult(data);
-      } else {
-        // 실패 시에만 다시 로그인 화면을 보여줌
-        document.getElementById('loginCard').style.display = 'block';
-        messageEl.textContent = data.message || '관리자 우회 실패';
-        messageEl.className = 'message error';
-      }
-    });
-  }
-
-  // ===== 한글 자판으로 잘못 입력된 열람번호를 영문으로 역변환 =====
-  // 두벌식 자판 기준: 한글 입력 시 눌렸던 실제 키(영문)를 복원
-  const HANGUL_TO_QWERTY = {
-    'ㅂ':'q','ㅈ':'w','ㄷ':'e','ㄱ':'r','ㅅ':'t','ㅛ':'y','ㅕ':'u','ㅑ':'i','ㅐ':'o','ㅔ':'p',
-    'ㅁ':'a','ㄴ':'s','ㅇ':'d','ㄹ':'f','ㅎ':'g','ㅗ':'h','ㅓ':'j','ㅏ':'k','ㅣ':'l',
-    'ㅋ':'z','ㅌ':'x','ㅊ':'c','ㅍ':'v','ㅠ':'b','ㅜ':'n','ㅡ':'m',
-    'ㅃ':'Q','ㅉ':'W','ㄸ':'E','ㄲ':'R','ㅆ':'T','ㅒ':'O','ㅖ':'P',
-  };
-
-  function decomposeHangul(ch) {
-    const code = ch.charCodeAt(0);
-    if (code < 0xAC00 || code > 0xD7A3) return null; // 완성형 한글 범위 밖
-    const CHO  = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-    const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
-    const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-    const idx = code - 0xAC00;
-    const cho  = CHO[Math.floor(idx / (21 * 28))];
-    const jung = JUNG[Math.floor((idx % (21 * 28)) / 28)];
-    const jong = JONG[idx % 28];
-    return { cho, jung, jong };
-  }
-
-  // 열람번호는 영문·숫자 조합이 원칙이므로, 완성형 한글이 섞여 있으면
-  // 두벌식 자판 매핑으로 되돌려 원래 눌렀을 영문 키 조합으로 복원한다.
-  function normalizeReportId(raw) {
-    let result = '';
-    for (const ch of raw) {
-      // 조합되지 않은 낱자(자음/모음)가 그대로 들어온 경우 — 바로 매핑
-      if (HANGUL_TO_QWERTY[ch]) {
-        result += HANGUL_TO_QWERTY[ch];
-        continue;
-      }
-      // 완성형 한글(가~힣)인 경우 — 초성·중성·종성으로 분해 후 매핑
-      const parts = decomposeHangul(ch);
-      if (!parts) {
-        result += ch; // 이미 영문/숫자면 그대로
-        continue;
-      }
-      if (HANGUL_TO_QWERTY[parts.cho]) result += HANGUL_TO_QWERTY[parts.cho];
-      if (HANGUL_TO_QWERTY[parts.jung]) result += HANGUL_TO_QWERTY[parts.jung];
-      if (parts.jong && HANGUL_TO_QWERTY[parts.jong]) result += HANGUL_TO_QWERTY[parts.jong];
-    }
-    return result;
-  }
-
-  // 열람번호 형식 정리 — 영문·숫자만 남기고 4자로 제한
-  function formatReportId(raw) {
-    return raw.replace(/[^A-Za-z0-9]/g, '').slice(0, 4);
-  }
-
-  // 타이핑하는 동안 4자리마다 자동으로 하이픈 삽입 (XXXX-XXXX)
-  document.getElementById('reportId').addEventListener('input', (e) => {
-    const cursorAtEnd = e.target.selectionEnd === e.target.value.length;
-    e.target.value = formatReportId(e.target.value);
-    if (cursorAtEnd) e.target.setSelectionRange(e.target.value.length, e.target.value.length);
-  });
-
-  // ===== 1단계: 열람번호 확인 =====
-  idForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const rawInput = document.getElementById('reportId').value.trim();
-    const reportId = formatReportId(normalizeReportId(rawInput)).toUpperCase();
-    if (!reportId) return;
-
-    idSubmitBtn.disabled = true;
-    idSubmitBtn.textContent = '확인 중...';
-    messageEl.textContent = '';
-    messageEl.className = 'message';
-
-    try {
-      const data = await callBackend({ report_id: reportId });
-
-      if (data.needs_setup) {
-        // 최초 접속 -> 비밀번호 설정 (같은 화면, placeholder와 안내문구 자리의 텍스트만 교체)
-        currentReportId = reportId;
-        passwordInput.placeholder = '비밀번호 설정';
-        introDynamicText.innerHTML = '지금 설정하시는 비밀번호로<br>계속 접속하시면 됩니다.';
-        introDynamicText.classList.add('setup-notice');
-        idForm.style.display = 'none';
-        passwordForm.style.display = 'block';
-      } else if (data.needs_login) {
-        // 이미 비밀번호 설정됨 -> 로그인 화면
-        currentReportId = reportId;
-        passwordInput.placeholder = '비밀번호 입력';
-        introDynamicText.innerHTML = '열람가능 기간은<br>발급일로부터 30일입니다.';
-        introDynamicText.classList.remove('setup-notice');
-        idForm.style.display = 'none';
-        passwordForm.style.display = 'block';
-      } else if (data.success) {
-        // 관리자 우회 등으로 비밀번호 없이 바로 통과되는 경우
-        showResult(data);
-      } else {
-        messageEl.textContent = data.message || '확인할 수 없습니다.';
-        messageEl.className = 'message error';
-      }
-    } catch (err) {
-      messageEl.textContent = '연결에 실패했습니다. 잠시 후 다시 시도해주세요.';
+    if (!data.success) {
+      messageEl.textContent = data.message || '비밀번호가 틀렸습니다.';
       messageEl.className = 'message error';
-    } finally {
-      idSubmitBtn.disabled = false;
-      idSubmitBtn.textContent = '확인';
-    }
-  });
-
-  // ===== 2단계: 비밀번호 설정 또는 로그인 =====
-  passwordForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const password = document.getElementById('password').value;
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = '확인 중...';
-    messageEl.textContent = '';
-    messageEl.className = 'message';
-
-    try {
-      const passwordHash = await sha256(password);
-      const data = await callBackend({ report_id: currentReportId, password_hash: passwordHash });
-
-      if (data.success) {
-        showResult(data);
-      } else {
-        messageEl.textContent = data.message || '열람에 실패했습니다.';
-        messageEl.className = 'message error';
-      }
-    } catch (err) {
-      messageEl.textContent = '연결에 실패했습니다. 잠시 후 다시 시도해주세요.';
-      messageEl.className = 'message error';
-    } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = '열람하기';
+      return;
     }
+
+    currentAdminCode = password;
+    allCustomers = data.customers || [];
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    renderCustomers(allCustomers);
+    loadConsultingData();
+
+  } catch (err) {
+    console.error(err);
+    messageEl.textContent = '서버 연결에 실패했습니다.';
+    messageEl.className = 'message error';
+    submitBtn.disabled = false;
+  }
+});
+
+function logout() {
+  currentAdminCode = '';
+  allCustomers = [];
+  allBookingData = [];
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('adminCode').value = '';
+  submitBtn.disabled = false;
+}
+
+/* =========================================================
+   상단 메인 메뉴 전환
+   ========================================================= */
+function switchMenu(index) {
+  document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`menu${index}`).classList.add('active');
+  document.querySelectorAll('.menu-btn')[index].classList.add('active');
+}
+
+/* =========================================================
+   메뉴0: 예약관리
+   ========================================================= */
+function switchTab(index) {
+  document.querySelectorAll('#menu0 .tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('#menu0 .tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`tab${index}`).classList.add('active');
+  document.querySelectorAll('#menu0 .tab-btn')[index].classList.add('active');
+
+  if (index === 1) updateStats();
+}
+
+function loadConsultingData() {
+  fetch(BOOKING_API_URL + '?action=getBookings')
+    .then(response => response.json())
+    .then(data => {
+      allBookingData = data.bookings || [];
+      renderTables();
+    })
+    .catch(error => {
+      console.error('로딩 오류:', error);
+      showToast('예약 데이터 로드 실패');
+    });
+}
+
+function renderTables() {
+  const pending = allBookingData
+    .map((b, idx) => ({ ...b, originalIndex: idx }))
+    .filter(b => !b.status || b.status === '신청');
+  const approved = allBookingData
+    .map((b, idx) => ({ ...b, originalIndex: idx }))
+    .filter(b => b.status === '확정');
+
+  const pendingHtml = pending.length > 0
+    ? pending.map((b) => `
+      <tr>
+        <td>${b.name || '-'}</td>
+        <td>${b.phone || '-'}</td>
+        <td>${b.type || '-'}</td>
+        <td>${formatDate(b.date)}</td>
+        <td>${(b.situation || '').substring(0, 20)}...</td>
+        <td>
+          <button class="approve" onclick="approveBooking(${b.originalIndex})">✓승인</button>
+          <button class="reject" onclick="rejectBooking(${b.originalIndex})">✕거절</button>
+        </td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="6" class="empty-row">신청 대기 항목이 없습니다.</td></tr>';
+
+  document.getElementById('pending-tbody').innerHTML = pendingHtml;
+
+  const approvedHtml = approved.length > 0
+    ? approved.map(b => `
+      <tr>
+        <td>${b.name || '-'}</td>
+        <td>${b.phone || '-'}</td>
+        <td>${formatDate(b.date)}</td>
+        <td>${b.approvedDate || '-'}</td>
+        <td>${b.reservedDate || '예약 대기'}</td>
+      </tr>
+    `).join('')
+    : '<tr><td colspan="5" class="empty-row">완료된 항목이 없습니다.</td></tr>';
+
+  document.getElementById('approved-tbody').innerHTML = approvedHtml;
+}
+
+function approveBooking(index) {
+  if (!confirm('승인하시겠습니까?')) return;
+
+  const booking = allBookingData[index];
+  const sheetRow = index + 2;
+
+  fetch(BOOKING_API_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'approve',
+      rowIndex: sheetRow,
+      eventId: booking.eventId || '',
+      phone: booking.phone,
+      reservedDate: booking.reservedDate,
+      reservedTime: booking.reservedTime
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showToast('승인되었습니다.');
+      loadConsultingData();
+    } else {
+      showToast('승인 실패: ' + (data.error || ''));
+    }
+  })
+  .catch(error => {
+    console.error('오류:', error);
+    showToast('승인 중 오류 발생');
   });
+}
+
+function rejectBooking(index) {
+  if (!confirm('거절하시겠습니까?')) return;
+
+  const sheetRow = index + 2;
+  const booking = allBookingData[index];
+
+  fetch(BOOKING_API_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'reject',
+      rowIndex: sheetRow,
+      phone: booking.phone
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showToast('거절되었습니다.');
+      loadConsultingData();
+    } else {
+      showToast('거절 실패: ' + (data.error || ''));
+    }
+  })
+  .catch(error => {
+    console.error('오류:', error);
+    showToast('거절 중 오류 발생');
+  });
+}
+
+function updateStats() {
+  const total = allBookingData.length;
+  const pending = allBookingData.filter(b => !b.status || b.status === '신청').length;
+  const approved = allBookingData.filter(b => b.status === '확정').length;
+
+  document.getElementById('stats-info').innerHTML = `
+    <div class="stat-row"><span class="stat-label">전체 신청</span><span class="stat-value">${total}건</span></div>
+    <div class="stat-row"><span class="stat-label">대기 중</span><span class="stat-value">${pending}건</span></div>
+    <div class="stat-row"><span class="stat-label">확정 완료</span><span class="stat-value">${approved}건</span></div>
+  `;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  if (typeof dateStr === 'number') {
+    return new Date(dateStr).toLocaleDateString('ko-KR');
+  }
+  return dateStr;
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast-msg');
+  toast.textContent = msg;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 3000);
+}
+
+/* =========================================================
+   메뉴1: 보고서관리 (기존 화면 그대로)
+   ========================================================= */
+function renderCustomers(list) {
+  const customerListEl = document.getElementById('customerList');
+  if (list.length === 0) {
+    customerListEl.innerHTML = '<div class="empty-state">검색 결과가 없습니다.</div>';
+    return;
+  }
+  customerListEl.innerHTML = list.map(c => {
+    const url = `https://rpt.netax.kr/?report_id=${encodeURIComponent(c.report_id)}&admin=${encodeURIComponent(currentAdminCode)}`;
+    const badge = c.is_expired ? '<span class="badge badge-expired">기간만료</span>' : '';
+
+    const topParts = [`<span class="customer-name">${escapeHtml(c.name)}</span>`];
+    if (c.title) topParts.push(`<span class="customer-title">${escapeHtml(c.title)}</span>`);
+    if (c.issued) topParts.push(`<span class="customer-issued">${formatReportDate(c.issued)}</span>`);
+
+    const metaParts = [];
+    if (c.first_access) metaParts.push('최초 ' + formatReportDate(c.first_access));
+    if (c.access_count > 0) metaParts.push(c.access_count + '회');
+    if (c.last_access) metaParts.push('최종 ' + formatReportDate(c.last_access));
+
+    return `<a class="customer-item" href="${url}" onclick="return openReportModal(event, '${url}', '${escapeHtml(c.name)} 보고서')">
+      <div class="customer-name-row">
+        ${topParts.join('')}
+        ${badge}
+        <button type="button" class="report-id-chip" title="열람번호 복사" onclick="event.stopPropagation(); event.preventDefault(); copyReportId('${escapeHtml(c.report_id)}', this)">${escapeHtml(c.report_id)} 복사</button>
+      </div>
+      <div class="customer-meta">${escapeHtml(metaParts.join(' · '))}</div>
+    </a>`;
+  }).join('');
+}
+
+function copyReportId(reportId, btn) {
+  const original = btn.textContent;
+  const done = () => {
+    btn.textContent = '복사됨!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove('copied');
+    }, 1500);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(reportId).then(done).catch(() => {
+      alert('복사에 실패했습니다. 열람번호: ' + reportId);
+    });
+  } else {
+    alert('열람번호: ' + reportId);
+  }
+}
+
+function formatReportDate(value) {
+  try {
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    const yy = String(d.getFullYear()).slice(-2);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yy}-${mm}-${dd}`;
+  } catch (e) {
+    return String(value);
+  }
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[m]));
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const keyword = e.target.value.trim().toLowerCase();
+  const filtered = allCustomers.filter(c => (c.name || '').toLowerCase().includes(keyword));
+  renderCustomers(filtered);
+});
+
+/* =========================================================
+   보고서 열람 모달 (뒤로가기로 목록 복귀)
+   ========================================================= */
+let reportModalOpen = false;
+
+function openReportModal(e, url, title) {
+  // Ctrl/Cmd/중간클릭 등은 브라우저 기본 동작(새 탭 열기)을 그대로 허용
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return true;
+  e.preventDefault();
+
+  document.getElementById('reportModalTitle').textContent = title;
+  document.getElementById('reportModalNewTab').href = url;
+  document.getElementById('reportModalFrame').src = url;
+  document.getElementById('reportModal').classList.add('active');
+
+  if (!reportModalOpen) {
+    history.pushState({ reportModal: true }, '');
+    reportModalOpen = true;
+  }
+  return false;
+}
+
+function closeReportModal() {
+  if (reportModalOpen) {
+    history.back(); // popstate 핸들러에서 실제 닫기 처리
+  } else {
+    closeReportModalInternal();
+  }
+}
+
+function closeReportModalInternal() {
+  document.getElementById('reportModal').classList.remove('active');
+  document.getElementById('reportModalFrame').src = 'about:blank';
+}
+
+window.addEventListener('popstate', () => {
+  if (reportModalOpen) {
+    reportModalOpen = false;
+    closeReportModalInternal();
+  }
+});
 </script>
 
 </body>
 </html>
-
-
-
