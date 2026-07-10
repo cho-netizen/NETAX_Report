@@ -1032,18 +1032,20 @@
   }
 
   // ===== 각주 처리: [^1] 형식을 실제 각주로 변환 =====
+  // 작성 과정에서 대괄호가 실수로 이스케이프(\[^1] 형태)되어도
+  // 정상 인식하도록 앞의 백슬래시 유무를 허용한다.
   function preprocessFootnotes(mdText) {
     const defs = {};
     const order = [];
-    // 각주 정의 줄 [^1]: 내용  을 찾아서 제거하고 저장
-    mdText = mdText.replace(/^\[\^([^\]]+)\]:\s*(.+)$/gm, (m, id, def) => {
+    // 각주 정의 줄 [^1]: 내용  을 찾아서 제거하고 저장 (선행 \ 허용)
+    mdText = mdText.replace(/^\\?\[\^([^\]]+)\]:\s*(.+)$/gm, (m, id, def) => {
       defs[id] = def;
       return '';
     });
     if (Object.keys(defs).length === 0) return mdText;
 
-    // 본문 중 [^1] 참조를 위첨자 링크로 변환
-    mdText = mdText.replace(/\[\^([^\]]+)\]/g, (m, id) => {
+    // 본문 중 [^1] 참조를 위첨자 링크로 변환 (선행 \ 허용)
+    mdText = mdText.replace(/\\?\[\^([^\]]+)\]/g, (m, id) => {
       if (!(id in defs)) return m;
       if (!order.includes(id)) order.push(id);
       const num = order.indexOf(id) + 1;
