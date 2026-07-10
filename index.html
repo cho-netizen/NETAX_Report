@@ -660,6 +660,10 @@
     color: var(--navy);
     list-style: none;
     word-break: keep-all;
+    transition: background 0.15s ease;
+  }
+  .md-content summary:hover {
+    background: #EFE8D8;
   }
   /* 11번: 콜론 앞 스페이스 — summary 내 em dash나 콜론 앞 여백 자연스럽게 */
   .md-content summary::after {
@@ -667,11 +671,16 @@
   }
   .md-content summary::-webkit-details-marker { display: none; }
   .md-content summary::before {
-    content: '▸ ';
+    content: '▶';
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 11px;
     color: var(--gold);
+    transition: transform 0.2s ease;
+    transform: rotate(0deg);
   }
   .md-content details[open] summary::before {
-    content: '▾ ';
+    transform: rotate(90deg);
   }
   .md-content details > *:not(summary) {
     padding: 0 16px;
