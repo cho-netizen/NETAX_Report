@@ -836,18 +836,12 @@
     position: relative;
     box-shadow: 0 12px 40px rgba(0,0,0,0.3);
   }
-  .statute-modal-close {
-    position: absolute; top: 10px; right: 12px;
-    background: none; border: none; font-size: 16px; color: #888; cursor: pointer;
-  }
-  .statute-modal-close:hover { color: var(--navy); }
   .statute-modal-title {
     font-family: 'Noto Serif KR', serif;
     font-weight: 700;
     font-size: 14.5px;
     color: var(--navy);
     margin-bottom: 12px;
-    padding-right: 20px;
     line-height: 1.4;
   }
   .statute-modal-body {
@@ -864,6 +858,14 @@
     border-bottom: 1px solid var(--gold);
   }
   .statute-modal-link:hover { color: var(--gold-light); }
+  .statute-modal-hint {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -1643,10 +1645,10 @@
 
   <div class="statute-modal-backdrop" id="statuteModal" onclick="if(event.target===this) closeStatuteModal()">
     <div class="statute-modal-box">
-      <button type="button" class="statute-modal-close" onclick="closeStatuteModal()" aria-label="닫기">✕</button>
       <div class="statute-modal-title" id="statuteModalTitle"></div>
       <div class="statute-modal-body" id="statuteModalBody"></div>
       <a class="statute-modal-link" id="statuteModalLink" target="_blank" rel="noopener">국가법령정보센터에서 전문 보기 ↗</a>
+      <div class="statute-modal-hint">바깥 영역을 클릭하거나 ESC 키를 누르면 닫힙니다</div>
     </div>
   </div>
 </body>
