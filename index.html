@@ -1363,10 +1363,11 @@
       let m;
       while ((m = pattern.exec(text))) {
         if (m.index > lastIndex) frag.appendChild(document.createTextNode(text.slice(lastIndex, m.index)));
+        const matchedText = m[0];
         const span = document.createElement('span');
         span.className = 'statute-link';
-        span.textContent = m[0];
-        span.addEventListener('click', () => showStatutePopup(m[0]));
+        span.textContent = matchedText;
+        span.addEventListener('click', () => showStatutePopup(matchedText));
         frag.appendChild(span);
         lastIndex = m.index + m[0].length;
       }
