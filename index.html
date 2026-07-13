@@ -807,6 +807,63 @@
       border-radius: 0;
     }
   }
+  .statute-link {
+    color: var(--navy);
+    background: rgba(200,162,68,0.16);
+    border-bottom: 1px solid var(--gold);
+    padding: 0 2px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .statute-link:hover { background: rgba(200,162,68,0.32); }
+
+  .statute-modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(13,27,61,0.55);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .statute-modal-box {
+    background: #FFFDF8;
+    border-top: 4px solid var(--gold);
+    border-radius: 8px;
+    max-width: 480px;
+    width: 100%;
+    padding: 24px 22px 20px;
+    position: relative;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .statute-modal-close {
+    position: absolute; top: 10px; right: 12px;
+    background: none; border: none; font-size: 16px; color: #888; cursor: pointer;
+  }
+  .statute-modal-close:hover { color: var(--navy); }
+  .statute-modal-title {
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    color: var(--navy);
+    margin-bottom: 12px;
+    padding-right: 20px;
+    line-height: 1.4;
+  }
+  .statute-modal-body {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 16px;
+  }
+  .statute-modal-link {
+    display: inline-block;
+    font-size: 12.5px;
+    color: var(--navy);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold);
+  }
+  .statute-modal-link:hover { color: var(--gold-light); }
 </style>
 </head>
 <body>
@@ -1235,6 +1292,104 @@
     }
   }
 
+  // ===== 조문 자동 하이퍼링크 + 팝업 =====
+  // 본문 텍스트에 등장하는 "법률명 §조번호" 패턴을 자동으로 클릭 가능한
+  // 링크로 바꾸고, 클릭 시 조문 요약과 국가법령정보센터 링크를 팝업으로 띄운다.
+  const STATUTE_INFO = {
+    '상증세법 §37': {
+      title: '상속세및증여세법 §37 — 부동산 무상사용에 따른 이익의 증여의제',
+      summary: '타인의 부동산을 무상으로 사용함으로써 이익을 얻은 경우, 그 이익에 상당하는 금액을 사용자의 증여재산가액으로 봅니다. 실제 지급한 대가가 없거나 시가보다 현저히 낮은 경우에 적용됩니다.'
+    },
+    '상증세법 §41-4': {
+      title: '상속세및증여세법 §41-4 — 금전 무상대출 등에 따른 이익의 증여',
+      summary: '특수관계인으로부터 금전을 무상 또는 적정이자율보다 낮은 이자율로 대출받은 경우, 적정이자율과 실제 이자율의 차이에 상당하는 이익을 증여받은 것으로 봅니다.'
+    },
+    '상증세법 §42': {
+      title: '상속세및증여세법 §42 — 재산 사용 및 용역제공 등에 따른 이익의 증여',
+      summary: '타인의 부동산을 담보로 제공받아 금전 등을 차입함으로써 얻은 이익, 또는 타인으로부터 시가보다 낮거나 높은 대가로 용역을 제공받거나 제공함으로써 얻은 이익 등에 대해 증여세를 과세합니다.'
+    },
+    '상증세법 §45-3': {
+      title: '상속세및증여세법 §45-3 — 특수관계법인과의 거래를 통한 이익의 증여의제(일감몰아주기)',
+      summary: '수혜법인의 매출 중 지배주주의 특수관계법인에 대한 매출 비중이 정상거래비율(일반 30%, 중소 50%, 중견 40%)을 초과하고 지배주주 등의 지분이 한계보유비율(일반 3%, 중소·중견 10%)을 초과하면, 그 초과이익에 대해 지배주주에게 증여세를 과세합니다.'
+    },
+    '상증세법 §45-5': {
+      title: '상속세및증여세법 §45-5 — 특정법인과의 거래를 통한 이익의 증여의제',
+      summary: '지배주주와 그 친족이 30% 이상 지분을 보유한 법인(특정법인)이 지배주주의 특수관계인과 무상·저가·고가 거래를 하여 이익을 얻은 경우, 그 이익에 지배주주 등의 지분율을 곱한 금액을 지배주주 등이 증여받은 것으로 봅니다.'
+    },
+    '소득세법 §97-2': {
+      title: '소득세법 §97-2 — 양도소득의 필요경비 계산 특례(증여 후 양도 이월과세)',
+      summary: '배우자·직계존비속으로부터 증여받은 자산을 증여일로부터 10년 이내에 양도하면, 양도차익 계산 시 취득가액을 증여 당시가 아닌 증여자의 원 취득가액으로 계산합니다.'
+    },
+    '조특법 §32': {
+      title: '조세특례제한법 §32 — 법인전환에 대한 양도소득세의 이월과세',
+      summary: '거주자가 사업용고정자산을 현물출자하거나 사업양수도 방식으로 법인으로 전환하는 경우, 양도소득세를 법인 전환 시점에 과세하지 않고 법인이 그 자산을 양도할 때까지 이연합니다. "새로 설립되는 법인"에 대한 출자를 전제로 합니다.'
+    },
+    '지방세법 §13①': {
+      title: '지방세법 §13① — 과밀억제권역 내 본점 사업용 부동산 취득세 중과',
+      summary: '과밀억제권역에서 법인의 본점·주사무소 사업용 부동산을 신축·증축하는 경우 취득세를 중과(표준세율+중과기준세율의 200%)합니다.'
+    },
+    '지방세법 §13②': {
+      title: '지방세법 §13② — 대도시 내 법인 설립·전입에 따른 취득세 중과',
+      summary: '대도시에서 법인을 설립하거나 지점·분사무소를 설치함에 따라 대도시의 부동산을 취득하는 경우, 또는 법인이 대도시 밖에서 대도시로 전입하는 경우 취득세를 중과합니다. 본점소재지가 대도시 밖이면 이 중과 요건 자체가 성립하지 않습니다.'
+    },
+    '지특법 §57-2': {
+      title: '지방세특례제한법 §57-2 — 부동산임대업 등에 대한 취득세 감면 배제',
+      summary: '부동산임대 및 공급업은 지특법상 취득세 감면(창업중소기업 등에 대한 감면 등) 적용 대상에서 명시적으로 제외됩니다.'
+    }
+  };
+
+  function linkifyStatutes(container) {
+    const keys = Object.keys(STATUTE_INFO).sort((a, b) => b.length - a.length);
+    const escaped = keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const pattern = new RegExp(escaped.join('|'), 'g');
+
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue) return NodeFilter.FILTER_SKIP;
+        if (node.parentElement && node.parentElement.closest('.statute-link')) return NodeFilter.FILTER_SKIP;
+        pattern.lastIndex = 0;
+        return pattern.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    const targets = [];
+    let n;
+    while ((n = walker.nextNode())) targets.push(n);
+
+    targets.forEach(node => {
+      pattern.lastIndex = 0;
+      const text = node.nodeValue;
+      let lastIndex = 0;
+      const frag = document.createDocumentFragment();
+      let m;
+      while ((m = pattern.exec(text))) {
+        if (m.index > lastIndex) frag.appendChild(document.createTextNode(text.slice(lastIndex, m.index)));
+        const span = document.createElement('span');
+        span.className = 'statute-link';
+        span.textContent = m[0];
+        span.addEventListener('click', () => showStatutePopup(m[0]));
+        frag.appendChild(span);
+        lastIndex = m.index + m[0].length;
+      }
+      if (lastIndex < text.length) frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+      node.parentNode.replaceChild(frag, node);
+    });
+  }
+
+  function showStatutePopup(key) {
+    const info = STATUTE_INFO[key];
+    if (!info) return;
+    document.getElementById('statuteModalTitle').textContent = info.title;
+    document.getElementById('statuteModalBody').textContent = info.summary;
+    const lawName = key.split(' ')[0];
+    document.getElementById('statuteModalLink').href =
+      'https://www.law.go.kr/LSW/lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&query=' + encodeURIComponent(lawName);
+    document.getElementById('statuteModal').style.display = 'flex';
+  }
+
+  function closeStatuteModal() {
+    document.getElementById('statuteModal').style.display = 'none';
+  }
+
   function showResult(data) {
     document.getElementById('customerName').textContent = data.customer_name;
     const frame = document.getElementById('materialFrame');
@@ -1266,6 +1421,7 @@
       renderKatex(contentEl);
       applyCalloutColors(contentEl);
       buildTableOfContents(contentEl);
+      linkifyStatutes(contentEl);
     } else {
       // 기존 방식: 구글 드라이브 파일을 iframe으로 표시
       contentEl.style.display = 'none';
@@ -1330,6 +1486,9 @@
   }
   document.addEventListener('fullscreenchange', updateFullscreenBtnLabel);
   document.addEventListener('webkitfullscreenchange', updateFullscreenBtnLabel);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeStatuteModal();
+  });
 
   // ===== 관리자 우회: ?report_id=7K4M&admin=관리자코드 로 접속하면 자동 진입 =====
   if (prefilledId && adminCodeParam) {
@@ -1481,6 +1640,14 @@
   });
 </script>
 
+  <div class="statute-modal-backdrop" id="statuteModal" onclick="if(event.target===this) closeStatuteModal()">
+    <div class="statute-modal-box">
+      <button type="button" class="statute-modal-close" onclick="closeStatuteModal()" aria-label="닫기">✕</button>
+      <div class="statute-modal-title" id="statuteModalTitle"></div>
+      <div class="statute-modal-body" id="statuteModalBody"></div>
+      <a class="statute-modal-link" id="statuteModalLink" target="_blank" rel="noopener">국가법령정보센터에서 전문 보기 ↗</a>
+    </div>
+  </div>
 </body>
 </html>
 
