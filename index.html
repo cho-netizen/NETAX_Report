@@ -379,11 +379,32 @@
 
   .md-content ul, .md-content ol {
     margin: 0 0 14px;
-    padding-left: 0;
-    list-style: none;
+    padding-left: 22px;
   }
 
+  .md-content ul { list-style: none; }
+  .md-content ul li { position: relative; }
+  .md-content ul li::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 9px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  .md-content ol { list-style: decimal; }
+  .md-content ol li::marker { color: var(--gold); font-weight: 700; }
+
   .md-content li { margin-bottom: 6px; }
+
+  .md-content li > ul,
+  .md-content li > ol {
+    margin-top: 6px;
+    margin-bottom: 0;
+  }
 
   .md-content .table-scroll {
     position: relative;
@@ -1040,6 +1061,16 @@
     }
   }
 
+  // ===== 유니코드 불릿 문자(•●▪◦‣ 등) → 마크다운 목록 기호(-) 치환 =====
+  // 구글독스 등 자동서식 기능을 거치면 "* 항목" 같은 마크다운 목록 표기가
+  // 실제 유니코드 불릿 문자(•)로 바뀌어 저장되는 경우가 있다. marked.js는
+  // *, -, + 만 목록 기호로 인식하므로, 이런 문서는 목록이 아니라 그냥
+  // 문단 텍스트로 처리되어 버린다. 파싱 전에 줄 앞머리(들여쓰기 허용)의
+  // 불릿류 문자를 표준 마크다운 목록 기호로 되돌린다.
+  function fixBulletChars(mdText) {
+    return mdText.replace(/^([ \t]*)[•●▪◦‣][ \t]+/gm, '$1- ');
+  }
+
   // ===== 보이지 않는(또는 잘 구분되지 않는) 오염 문자 정규화 =====
   // Word/한글/구글독스 등에서 복사·붙여넣기하거나, 한글 입력기 환경에서
   // 반복 편집·저장할 때 일반 공백 자리에 다른 유니코드 공백류 문자가
@@ -1065,6 +1096,7 @@
   // 경우(\*\*, \\\*\\\* 등)가 있어, 별표 앞 백슬래시를 먼저 정리한다.
   function preprocessBold(mdText) {
     mdText = sanitizeInvisibleChars(mdText);
+    mdText = fixBulletChars(mdText);
     // 1) 별표 앞에 누적된 백슬래시 제거 (의도적 이스케이프보다 중첩오염이 훨씬 흔함)
     mdText = mdText.replace(/\\+(\*)/g, '$1');
     // 2) **텍스트** 구간을 marked 파싱 전에 직접 <strong>으로 치환 (줄바꿈·중첩 별표 제외)
