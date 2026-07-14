@@ -1342,6 +1342,29 @@
     }
   };
 
+  // 단축 법령명 -> 국가법령정보센터 공식 법령명 (MST 조회 시 검색어로 사용)
+  const STATUTE_LAW_FULLNAME = {
+    '상증세법': '상속세 및 증여세법',
+    '소득세법': '소득세법',
+    '조특법': '조세특례제한법',
+    '지방세법': '지방세법',
+    '지특법': '지방세특례제한법'
+  };
+
+  // 법령별 MST(법령일련번호)는 세션 동안만 캐시(같은 법령의 다른 조문을 열 때 재조회 방지)
+  const statuteMstCache = {};
+  let currentStatuteKey = null;
+
+  // '§45-5' -> '4505', '§13①' -> '1300', '§32' -> '3200'
+  // JO 파라미터 규격: 조번호 4자리 + 조가지번호 2자리(항 표시 ①②는 조가지가 아니므로 무시)
+  function parseJoCode(key) {
+    const m = key.match(/§(\d+)(?:-(\d+))?/);
+    if (!m) return null;
+    const article = parseInt(m[1], 10);
+    const branch = m[2] ? parseInt(m[2], 10) : 0;
+    return String(article).padStart(4, '0') + String(branch).padStart(2, '0');
+  }
+
   function linkifyStatutes(container) {
     const keys = Object.keys(STATUTE_INFO).sort((a, b) => b.length - a.length);
     const escaped = keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
@@ -1380,19 +1403,46 @@
     });
   }
 
-  function showStatutePopup(key) {
+  async function showStatutePopup(key) {
     const info = STATUTE_INFO[key];
     if (!info) return;
+    currentStatuteKey = key;
+
     document.getElementById('statuteModalTitle').textContent = info.title;
     document.getElementById('statuteModalBody').textContent = info.summary;
-    const lawName = key.split(' ')[0];
-    document.getElementById('statuteModalLink').href =
-      'https://www.law.go.kr/LSW/lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&query=' + encodeURIComponent(lawName);
+
+    const lawShort = key.split(' ')[0];
+    const lawFullName = STATUTE_LAW_FULLNAME[lawShort] || lawShort;
+    const linkEl = document.getElementById('statuteModalLink');
+
+    // 정밀 링크가 준비되기 전까지는 우선 법령명 검색 페이지로 연결(즉시 표시)
+    linkEl.href = 'https://www.law.go.kr/LSW/lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&query=' + encodeURIComponent(lawFullName);
     document.getElementById('statuteModal').style.display = 'flex';
+
+    // 조번호를 못 뽑아내는 형식이면(예상 밖 키) 검색 링크 그대로 둔다
+    const jo = parseJoCode(key);
+    if (!jo) return;
+
+    try {
+      let mst = statuteMstCache[lawFullName];
+      if (!mst) {
+        const data = await callBackend({ action: 'get_statute_mst', law_name: lawFullName });
+        if (!data.success || !data.mst) return; // 조회 실패 시 기존 검색 링크 유지
+        mst = data.mst;
+        statuteMstCache[lawFullName] = mst;
+      }
+      // 조회하는 동안 사용자가 다른 조문 팝업으로 넘어갔으면 반영하지 않음
+      if (currentStatuteKey !== key) return;
+      linkEl.href = 'https://www.law.go.kr/DRF/lawService.do?OC=netax&target=law&MST=' +
+        encodeURIComponent(mst) + '&type=HTML&JO=' + jo;
+    } catch (err) {
+      // 네트워크 오류 시 기존 검색 링크 그대로 사용(사용자 경험에 영향 없음)
+    }
   }
 
   function closeStatuteModal() {
     document.getElementById('statuteModal').style.display = 'none';
+    currentStatuteKey = null;
   }
 
   function showResult(data) {
