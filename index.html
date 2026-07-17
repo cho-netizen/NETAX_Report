@@ -4,24 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b2a41'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='34' font-weight='700' fill='%23c9a227' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
 <title>자문보고서 열람 | NETAX</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
-<!-- KaTeX: 수식 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-<!-- Chart.js: 원형·꺾은선·막대 차트 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<!-- Prism.js: 코드 하이라이팅 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<!-- 2026.07: 보고서작성시스템(desk.netax.kr/report-writer)이 렌더링을 전담하고, 여기서는
+     완성된 결과(HTML)를 그대로 표시만 한다. marked/mermaid/KaTeX/Chart.js/Prism 등
+     렌더링 라이브러리는 더 이상 이 페이지에서 필요하지 않으므로 제거함. -->
 <style>
   :root {
     --navy: #0D1B3D;
@@ -959,469 +948,6 @@
     return res.json();
   }
 
-  // ===== KaTeX 수식 렌더링 =====
-  // 문법: 인라인 수식 $수식$, 블록 수식 $$수식$$
-  function renderKatex(container) {
-    if (!window.renderMathInElement) return;
-    renderMathInElement(container, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$',  right: '$',  display: false },
-      ],
-      throwOnError: false,
-      output: 'html',
-    });
-  }
-
-  // ===== Chart.js 차트 렌더링 =====
-  // 문법: ```chart
-  // type: pie | line | bar | doughnut | radar
-  // title: 차트 제목
-  // labels: 항목1, 항목2, 항목3
-  // data: 10, 20, 30
-  // colors: #색1, #색2, #색3  (선택)
-  // ```
-  function renderChartBlocks(container) {
-    if (!window.Chart) return;
-    const blocks = container.querySelectorAll('code.language-chart');
-    let chartIdx = 0;
-    blocks.forEach(block => {
-      chartIdx++;
-      const lines = block.textContent.trim().split('\n');
-      const cfg = {};
-      lines.forEach(l => {
-        const m = l.match(/^(\w+)\s*:\s*(.+)$/);
-        if (m) cfg[m[1].trim().toLowerCase()] = m[2].trim();
-      });
-
-      const type    = cfg.type    || 'bar';
-      const title   = cfg.title   || '';
-      const labels  = (cfg.labels || '').split(',').map(s => s.trim());
-      const data    = (cfg.data   || '').split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-      const defaultColors = ['#0D1B3D','#C8A244','#4A6080','#8BA3C7','#D4A96A','#6B8E9F','#2A3F63','#E8D5A3'];
-      const colors  = cfg.colors
-        ? cfg.colors.split(',').map(s => s.trim())
-        : defaultColors.slice(0, data.length);
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'chart-wrapper';
-      if (title) {
-        const h = document.createElement('div');
-        h.className = 'chart-title';
-        h.textContent = title;
-        wrapper.appendChild(h);
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.id = 'netax-chart-' + chartIdx;
-      canvas.style.maxHeight = '320px';
-      wrapper.appendChild(canvas);
-      block.closest('pre').replaceWith(wrapper);
-
-      new Chart(canvas, {
-        type,
-        data: {
-          labels,
-          datasets: [{
-            data,
-            backgroundColor: colors,
-            borderColor: type === 'line' ? colors[0] : colors,
-            borderWidth: type === 'line' ? 2 : 1,
-            fill: type === 'line' ? false : undefined,
-            tension: 0.3,
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: ['pie','doughnut','radar'].includes(type) },
-            title: { display: false },
-          },
-          scales: ['pie','doughnut','radar'].includes(type) ? {} : {
-            y: { beginAtZero: true, ticks: { font: { family: "'Noto Sans KR'" } } },
-            x: { ticks: { font: { family: "'Noto Sans KR'" } } },
-          },
-        }
-      });
-    });
-  }
-
-  // ===== Prism.js 코드 하이라이팅 =====
-  // 문법: ```js, ```python, ```sql 등 일반 코드블록
-  function renderPrismBlocks(container) {
-    if (!window.Prism) return;
-    Prism.highlightAllUnder(container);
-  }
-
-  // ===== 타임라인 렌더링 =====
-  // 문법: ```timeline
-  // 2015.01 : 201호 취득
-  // 2021.03 : 이혼·합가
-  // 2026.07 : 매매 예정
-  // ```
-  function renderTimelineBlocks(container) {
-    const blocks = container.querySelectorAll('code.language-timeline');
-    blocks.forEach(block => {
-      const lines = block.textContent.trim().split('\n').filter(l => l.includes(':'));
-      const wrapper = document.createElement('div');
-      wrapper.className = 'timeline-chart';
-      lines.forEach(l => {
-        const idx = l.indexOf(':');
-        const date  = l.slice(0, idx).trim();
-        const label = l.slice(idx + 1).trim();
-        wrapper.innerHTML += `
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-date">${date}</div>
-            <div class="timeline-label">${label}</div>
-          </div>`;
-      });
-      block.closest('pre').replaceWith(wrapper);
-    });
-  }
-
-  // Mermaid 다이어그램을 NETAX 브랜드 컬러로 초기화
-  if (window.mermaid) {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'base',
-      themeVariables: {
-        primaryColor: '#0D1B3D',
-        primaryTextColor: '#F8F6F0',
-        primaryBorderColor: '#C8A244',
-        lineColor: '#C8A244',
-        secondaryColor: '#2A3F63',
-        tertiaryColor: '#F5F1E8',
-        fontFamily: "'Noto Sans KR', sans-serif",
-        fontSize: '13px',
-      },
-      flowchart: {
-        htmlLabels: true,
-        nodeSpacing: 24,
-        rankSpacing: 36,
-        padding: 8,
-        curve: 'basis',
-      },
-    });
-  }
-
-  // 마크다운 안의 ```mermaid 코드블록을 실제 도식으로 변환
-  async function renderMermaidBlocks(container) {
-    if (!window.mermaid) return;
-    const blocks = container.querySelectorAll('code.language-mermaid');
-    let i = 0;
-    for (const block of blocks) {
-      i++;
-      try {
-        const { svg } = await mermaid.render('mermaid-diagram-' + i, block.textContent);
-        const wrapper = document.createElement('div');
-        wrapper.className = 'mermaid-diagram';
-        wrapper.innerHTML = svg;
-        block.closest('pre').replaceWith(wrapper);
-      } catch (err) {
-        // 문법 오류 시 원본 코드블록 그대로 유지
-      }
-    }
-  }
-
-  // ===== 유니코드 불릿 문자(•●▪◦‣ 등) → 마크다운 목록 기호(-) 치환 =====
-  // 구글독스 등 자동서식 기능을 거치면 "* 항목" 같은 마크다운 목록 표기가
-  // 실제 유니코드 불릿 문자(•)로 바뀌어 저장되는 경우가 있다. marked.js는
-  // *, -, + 만 목록 기호로 인식하므로, 이런 문서는 목록이 아니라 그냥
-  // 문단 텍스트로 처리되어 버린다. 파싱 전에 줄 앞머리(들여쓰기 허용)의
-  // 불릿류 문자를 표준 마크다운 목록 기호로 되돌린다.
-  function fixBulletChars(mdText) {
-    return mdText.replace(/^([ \t]*)[•●▪◦‣][ \t]+/gm, '$1- ');
-  }
-
-  // ===== 보이지 않는(또는 잘 구분되지 않는) 오염 문자 정규화 =====
-  // Word/한글/구글독스 등에서 복사·붙여넣기하거나, 한글 입력기 환경에서
-  // 반복 편집·저장할 때 일반 공백 자리에 다른 유니코드 공백류 문자가
-  // 섞여 들어가는 경우가 흔하다. 특히:
-  //   - NBSP(비파괴공백, U+00A0) 등 폭이 1칸인 공백류 문자
-  //   - 전각공백(U+3000, Ideographic Space) — 한글 환경에서 특히 흔하며 폭이 2칸
-  // marked.js는 이런 문자를 공백으로 인식하지 않아 들여쓰기 목록·중첩 목록·
-  // 수평선(---) 인식이 실패하므로, 파싱 전에 반드시 일반 공백으로 치환한다.
-  // 전각공백은 시각적 폭이 2칸이므로 들여쓰기 폭 보존을 위해 공백 2개로 치환한다.
-  // 제로폭 문자(zero-width space 등)는 화면에 안 보이면서 파싱만 방해하므로 제거한다.
-  function sanitizeInvisibleChars(mdText) {
-    return mdText
-      .replace(/\u3000/g, '  ')
-      .replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F]/g, ' ')
-      .replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
-  }
-
-  // ===== 볼드(**) 렌더링 버그 방어: marked.js 12.0.2는 닫는 **가 (특히 따옴표 등
-  // 문장부호 뒤에서) 공백 없이 한글 등 비ASCII 문자와 바로 붙으면 볼드로 인식하지
-  // 못하는 결함이 있다. **...** 구간을 marked가 보기 전에 직접 <strong> 태그로
-  // 치환해 이 버그를 원천적으로 우회한다.
-  // 또한 여러 차례 편집·저장 과정에서 별표 앞에 백슬래시가 중첩 이스케이프되는
-  // 경우(\*\*, \\\*\\\* 등)가 있어, 별표 앞 백슬래시를 먼저 정리한다.
-  function preprocessBold(mdText) {
-    mdText = sanitizeInvisibleChars(mdText);
-    mdText = fixBulletChars(mdText);
-    // 1) 별표 앞에 누적된 백슬래시 제거 (의도적 이스케이프보다 중첩오염이 훨씬 흔함)
-    mdText = mdText.replace(/\\+(\*)/g, '$1');
-    // 2) **텍스트** 구간을 marked 파싱 전에 직접 <strong>으로 치환 (줄바꿈·중첩 별표 제외)
-    mdText = mdText.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
-    return mdText;
-  }
-
-  // ===== 각주 처리: [^1] 형식을 실제 각주로 변환 =====
-  // 작성 과정에서 대괄호가 실수로 이스케이프(\[^1] 형태)되어도
-  // 정상 인식하도록 앞의 백슬래시 유무를 허용한다.
-  function preprocessFootnotes(mdText) {
-    const defs = {};
-    const order = [];
-    // 각주 정의 줄 [^1]: 내용  을 찾아서 제거하고 저장 (선행 \ 허용)
-    mdText = mdText.replace(/^\\?\[\^([^\]]+)\]:\s*(.+)$/gm, (m, id, def) => {
-      defs[id] = def;
-      return '';
-    });
-    if (Object.keys(defs).length === 0) return mdText;
-
-    // 본문 중 [^1] 참조를 위첨자 링크로 변환 (선행 \ 허용)
-    mdText = mdText.replace(/\\?\[\^([^\]]+)\]/g, (m, id) => {
-      if (!(id in defs)) return m;
-      if (!order.includes(id)) order.push(id);
-      const num = order.indexOf(id) + 1;
-      return `<sup id="fnref-${id}"><a href="#fn-${id}">[${num}]</a></sup>`;
-    });
-
-    if (order.length > 0) {
-      let footnoteSection = '\n\n## 각주\n\n';
-      order.forEach((id, i) => {
-        footnoteSection += `${i + 1}. <span id="fn-${id}">${defs[id]}</span> <a href="#fnref-${id}">↩</a>\n`;
-      });
-      mdText += footnoteSection;
-    }
-    return mdText;
-  }
-
-  // ===== 숫자 비교 막대그래프: ```compare 코드블록을 그래프로 변환 =====
-  function renderCompareBars(container) {
-    const blocks = container.querySelectorAll('code.language-compare');
-    blocks.forEach(block => {
-      const lines = block.textContent.trim().split('\n').filter(l => l.includes(':'));
-      const items = lines.map(l => {
-        const idx = l.lastIndexOf(':');
-        return { label: l.slice(0, idx).trim(), value: parseFloat(l.slice(idx + 1).replace(/,/g, '').trim()) };
-      }).filter(it => !isNaN(it.value));
-      if (items.length === 0) return;
-
-      const max = Math.max(...items.map(it => it.value));
-      const wrapper = document.createElement('div');
-      wrapper.className = 'compare-chart';
-      items.forEach(it => {
-        const pct = max > 0 ? (it.value / max * 100) : 0;
-        const row = document.createElement('div');
-        row.className = 'compare-row';
-        row.innerHTML = `
-          <div class="compare-label">${it.label}</div>
-          <div class="compare-track"><div class="compare-fill" style="width:${pct}%"></div></div>
-          <div class="compare-value">${it.value.toLocaleString()}</div>
-        `;
-        wrapper.appendChild(row);
-      });
-      block.closest('pre').replaceWith(wrapper);
-    });
-  }
-
-  // ===== 표 스크롤 힌트: 실제로 화면보다 넓어 스크롤이 필요한 표에만, 스크롤 위치에 따라 좌/우 화살표 표시 =====
-  function updateScrollHint(el) {
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    el.classList.toggle('show-right', el.scrollLeft < maxScroll - 2);
-    el.classList.toggle('show-left', el.scrollLeft > 2);
-  }
-
-  function markScrollableTables(container) {
-    container.querySelectorAll('.table-scroll').forEach(el => {
-      if (el.scrollWidth > el.clientWidth + 1) {
-        const isNew = !el.classList.contains('scrollable');
-        el.classList.add('scrollable');
-        updateScrollHint(el);
-        if (isNew) el.addEventListener('scroll', () => updateScrollHint(el));
-      }
-    });
-  }
-
-  // ===== 알림 상자 색상 구분: 인용문 첫 글자(이모지)로 판별해 색상만 부여하고, 이모지 글자 자체는 화면에서 제거 =====
-  function applyCalloutColors(container) {
-    const quotes = container.querySelectorAll('blockquote');
-    quotes.forEach(bq => {
-      const text = bq.textContent.trim();
-      let cls = null, stripRe = null;
-      if (text.startsWith('✅')) { cls = 'callout-success'; stripRe = /^✅\s*/; }
-      else if (text.startsWith('⚠️') || text.startsWith('⚠')) { cls = 'callout-warning'; stripRe = /^⚠️?\s*/; }
-      else if (text.startsWith('❌') || text.startsWith('🚫')) { cls = 'callout-danger'; stripRe = /^(❌|🚫)\s*/; }
-      else if (text.startsWith('ℹ️') || text.startsWith('ℹ')) { cls = 'callout-info'; stripRe = /^ℹ️?\s*/; }
-      if (!cls) return;
-      bq.classList.add(cls);
-      // 판별에 쓴 이모지는 표시 텍스트에서만 제거 (판별 로직은 원본 이모지에 의존하므로 마크다운 원문은 그대로 유지)
-      const walker = document.createTreeWalker(bq, NodeFilter.SHOW_TEXT);
-      const firstTextNode = walker.nextNode();
-      if (firstTextNode) {
-        firstTextNode.textContent = firstTextNode.textContent.replace(stripRe, '');
-      }
-    });
-  }
-
-  // ===== 목차 자동 생성: h2(장 제목) 기준으로 상단에 네비게이션 삽입 =====
-  function buildTableOfContents(container) {
-    // 1번: "기본 사실관계" 등 머리말 h2는 목차에서 제외 — 텍스트 내용으로 필터링
-    const EXCLUDE_HEADINGS = ['기본 사실관계'];
-    const headings = Array.from(container.querySelectorAll('h2')).filter(h => {
-      const text = h.textContent.trim();
-      return !EXCLUDE_HEADINGS.some(ex => text.startsWith(ex));
-    });
-    if (headings.length < 2) return;
-
-    const toc = document.createElement('nav');
-    toc.className = 'toc';
-    let tocHtml = '<div class="toc-title">목차</div><ul>';
-    headings.forEach((h, i) => {
-      const id = 'section-' + i;
-      h.id = id;
-      const label = h.textContent.trim();
-      tocHtml += `<li><a href="#${id}">${label}</a></li>`;
-    });
-    tocHtml += '</ul>';
-    toc.innerHTML = tocHtml;
-
-    const firstH1 = container.querySelector('h1');
-    if (firstH1) {
-      firstH1.after(toc);
-    } else {
-      container.prepend(toc);
-    }
-  }
-
-  // ===== 조문 자동 하이퍼링크 + 팝업 =====
-  // 본문 텍스트에 등장하는 "법률명 §조번호" 패턴을 자동으로 클릭 가능한
-  // 링크로 바꾸고, 클릭 시 조문 요약과 국가법령정보센터 링크를 팝업으로 띄운다.
-  const STATUTE_INFO = {
-    '상증세법 §37': {
-      title: '상속세및증여세법 §37 — 부동산 무상사용에 따른 이익의 증여의제',
-      summary: '타인의 부동산을 무상으로 사용함으로써 이익을 얻은 경우, 그 이익에 상당하는 금액을 사용자의 증여재산가액으로 봅니다. 실제 지급한 대가가 없거나 시가보다 현저히 낮은 경우에 적용됩니다.'
-    },
-    '상증세법 §41-4': {
-      title: '상속세및증여세법 §41-4 — 금전 무상대출 등에 따른 이익의 증여',
-      summary: '특수관계인으로부터 금전을 무상 또는 적정이자율보다 낮은 이자율로 대출받은 경우, 적정이자율과 실제 이자율의 차이에 상당하는 이익을 증여받은 것으로 봅니다.'
-    },
-    '상증세법 §42': {
-      title: '상속세및증여세법 §42 — 재산 사용 및 용역제공 등에 따른 이익의 증여',
-      summary: '금전 무상대출(§41-4)·부동산 무상사용(§37) 등 개별 규정으로 포착되지 않는 재산·용역 관련 이익을 폭넓게 과세하는 보충적 규정입니다. 대표적으로 ①타인의 재산을 무상 또는 저가로 사용, ②타인의 재산을 담보로 제공받아 금전 등을 차입, ③시가보다 현저히 낮거나 높은 대가로 용역을 제공받거나 제공하는 경우 등이 해당하며, 그 이익에 상당하는 금액에 증여세를 과세합니다.'
-    },
-    '상증세법 §45-3': {
-      title: '상속세및증여세법 §45-3 — 특수관계법인과의 거래를 통한 이익의 증여의제(일감몰아주기)',
-      summary: '수혜법인의 매출 중 지배주주의 특수관계법인에 대한 매출 비중이 정상거래비율(일반 30%, 중소 50%, 중견 40%)을 초과하고 지배주주 등의 지분이 한계보유비율(일반 3%, 중소·중견 10%)을 초과하면, 그 초과이익에 대해 지배주주에게 증여세를 과세합니다.'
-    },
-    '상증세법 §45-5': {
-      title: '상속세및증여세법 §45-5 — 특정법인과의 거래를 통한 이익의 증여의제',
-      summary: '지배주주와 그 친족이 30% 이상 지분을 보유한 법인(특정법인)이 지배주주의 특수관계인과 무상·저가·고가 거래를 하여 이익을 얻은 경우, 그 이익에 지배주주 등의 지분율을 곱한 금액을 지배주주 등이 증여받은 것으로 봅니다.'
-    },
-    '소득세법 §97-2': {
-      title: '소득세법 §97-2 — 양도소득의 필요경비 계산 특례(증여 후 양도 이월과세)',
-      summary: '배우자·직계존비속으로부터 증여받은 자산을 증여일로부터 10년 이내에 양도하면, 양도차익 계산 시 취득가액을 증여 당시가 아닌 증여자의 원 취득가액으로 계산합니다.'
-    },
-    '조특법 §32': {
-      title: '조세특례제한법 §32 — 법인전환에 대한 양도소득세의 이월과세',
-      summary: '거주자가 사업용고정자산을 현물출자하거나 사업양수도 방식으로 법인으로 전환하는 경우, 양도소득세를 법인 전환 시점에 과세하지 않고 법인이 그 자산을 양도할 때까지 이연합니다. "새로 설립되는 법인"에 대한 출자를 전제로 합니다.'
-    },
-    '지방세법 §13①': {
-      title: '지방세법 §13① — 과밀억제권역 내 본점 사업용 부동산 취득세 중과',
-      summary: '과밀억제권역에서 법인의 본점·주사무소 사업용 부동산을 신축·증축하는 경우 취득세를 중과(표준세율+중과기준세율의 200%)합니다.'
-    },
-    '지방세법 §13②': {
-      title: '지방세법 §13② — 대도시 내 법인 설립·전입에 따른 취득세 중과',
-      summary: '대도시에서 법인을 설립하거나 지점·분사무소를 설치함에 따라 대도시의 부동산을 취득하는 경우, 또는 법인이 대도시 밖에서 대도시로 전입하는 경우 취득세를 중과합니다. 본점소재지가 대도시 밖이면 이 중과 요건 자체가 성립하지 않습니다.'
-    },
-    '지특법 §57-2': {
-      title: '지방세특례제한법 §57-2 — 부동산임대업 등에 대한 취득세 감면 배제',
-      summary: '부동산임대 및 공급업은 지특법상 취득세 감면(창업중소기업 등에 대한 감면 등) 적용 대상에서 명시적으로 제외됩니다.'
-    }
-  };
-
-  // 단축 법령명 -> 국가법령정보센터 공식 법령명 (MST 조회 시 검색어로 사용)
-  const STATUTE_LAW_FULLNAME = {
-    '상증세법': '상속세 및 증여세법',
-    '소득세법': '소득세법',
-    '조특법': '조세특례제한법',
-    '지방세법': '지방세법',
-    '지특법': '지방세특례제한법'
-  };
-
-  // '§45-5' -> '제45조의5', '§13①' -> '제13조', '§32' -> '제32조'
-  // law.go.kr 공식 "법령 한글주소" 규칙: /법령/{법령명}/{제N조} (항 표시 ①②는 조 단위 링크라 무시)
-  function buildArticlePath(key) {
-    const m = key.match(/§(\d+)(?:-(\d+))?/);
-    if (!m) return null;
-    const article = m[1];
-    const branch = m[2];
-    return '제' + article + '조' + (branch ? '의' + branch : '');
-  }
-
-  function linkifyStatutes(container) {
-    const keys = Object.keys(STATUTE_INFO).sort((a, b) => b.length - a.length);
-    const escaped = keys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const pattern = new RegExp(escaped.join('|'), 'g');
-
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) {
-        if (!node.nodeValue) return NodeFilter.FILTER_SKIP;
-        if (node.parentElement && node.parentElement.closest('.statute-link')) return NodeFilter.FILTER_SKIP;
-        pattern.lastIndex = 0;
-        return pattern.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-      }
-    });
-    const targets = [];
-    let n;
-    while ((n = walker.nextNode())) targets.push(n);
-
-    targets.forEach(node => {
-      pattern.lastIndex = 0;
-      const text = node.nodeValue;
-      let lastIndex = 0;
-      const frag = document.createDocumentFragment();
-      let m;
-      while ((m = pattern.exec(text))) {
-        if (m.index > lastIndex) frag.appendChild(document.createTextNode(text.slice(lastIndex, m.index)));
-        const matchedText = m[0];
-        const span = document.createElement('span');
-        span.className = 'statute-link';
-        span.textContent = matchedText;
-        span.addEventListener('click', () => showStatutePopup(matchedText));
-        frag.appendChild(span);
-        lastIndex = m.index + m[0].length;
-      }
-      if (lastIndex < text.length) frag.appendChild(document.createTextNode(text.slice(lastIndex)));
-      node.parentNode.replaceChild(frag, node);
-    });
-  }
-
-  function showStatutePopup(key) {
-    const info = STATUTE_INFO[key];
-    if (!info) return;
-
-    document.getElementById('statuteModalTitle').textContent = info.title;
-    document.getElementById('statuteModalBody').textContent = info.summary;
-
-    const lawShort = key.split(' ')[0];
-    const lawFullName = STATUTE_LAW_FULLNAME[lawShort] || lawShort;
-    const articlePath = buildArticlePath(key);
-    const linkEl = document.getElementById('statuteModalLink');
-
-    linkEl.href = articlePath
-      ? 'https://www.law.go.kr/법령/' + encodeURIComponent(lawFullName) + '/' + encodeURIComponent(articlePath)
-      : 'https://www.law.go.kr/LSW/lsSc.do?section=&menuId=1&subMenuId=15&tabMenuId=81&query=' + encodeURIComponent(lawFullName);
-
-    document.getElementById('statuteModal').style.display = 'flex';
-  }
-
-  function closeStatuteModal() {
-    document.getElementById('statuteModal').style.display = 'none';
-  }
-
   function showResult(data) {
     document.getElementById('customerName').textContent = data.customer_name;
     const frame = document.getElementById('materialFrame');
@@ -1435,25 +961,26 @@
       viewerEl.classList.remove('protected');
     }
 
-    if (data.report_content) {
-      // 마크다운 원문을 브랜드 스타일로 직접 렌더링
+    if (data.report_html) {
+      // 2026.07~: 보고서작성시스템(desk.netax.kr/report-writer)에서 렌더링까지 끝낸
+      // 완성본 HTML을 그대로 받아 iframe에 표시만 한다. rpt 쪽에는 렌더링 로직이 없다.
+      contentEl.style.display = 'none';
+      frame.style.display = 'block';
+      frame.removeAttribute('src');
+      frame.srcdoc = data.report_html;
+    } else if (data.report_content) {
+      // ⚠ 레거시 경로: 백엔드가 아직 완성본 HTML이 아니라 마크다운 원문을 내려주는
+      // (구 등록 방식으로 남아있는) 보고서용. 이 페이지에는 더 이상 marked/mermaid/
+      // KaTeX/Chart.js/Prism이 로드되어 있지 않으므로 서식 없이 원문 그대로만 보여준다.
+      // admin.netax.kr에서 report-writer 완성본(HTML)으로 재등록하면 위 report_html
+      // 경로로 정상 전환된다.
       frame.style.display = 'none';
       contentEl.style.display = 'block';
-      const processedMd = preprocessBold(preprocessFootnotes(data.report_content));
-      let renderedHtml = marked.parse(processedMd);
-      renderedHtml = renderedHtml
-        .replace(/<table>/g, '<div class="table-scroll"><table>')
-        .replace(/<\/table>/g, '</table></div>');
-      contentEl.innerHTML = renderedHtml;
-      renderMermaidBlocks(contentEl);
-      renderCompareBars(contentEl);
-      renderChartBlocks(contentEl);
-      renderTimelineBlocks(contentEl);
-      renderPrismBlocks(contentEl);
-      renderKatex(contentEl);
-      applyCalloutColors(contentEl);
-      buildTableOfContents(contentEl);
-      linkifyStatutes(contentEl);
+      const pre = document.createElement('pre');
+      pre.style.cssText = 'white-space:pre-wrap; word-break:break-word; font-family:inherit;';
+      pre.textContent = data.report_content;
+      contentEl.innerHTML = '';
+      contentEl.appendChild(pre);
     } else {
       // 기존 방식: 구글 드라이브 파일을 iframe으로 표시
       contentEl.style.display = 'none';
@@ -1470,14 +997,8 @@
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('viewer').style.display = 'flex';
 
-    // 뷰어가 화면에 실제로 보이게 된 뒤에 측정해야 scrollWidth/clientWidth가 정확함
-    // (display:none 상태에서 재면 항상 0이라 넘침 감지가 안 됨)
-    if (data.report_content) {
-      markScrollableTables(contentEl);
-    }
-
     // 스크롤 위치를 맨 위로 강제 초기화 (이전 위치나 브라우저 자동 스크롤 보정으로
-    // 중간부터 보이는 문제 방지). 비동기 렌더링(mermaid 등) 이후에도 한 번 더 보정.
+    // 중간부터 보이는 문제 방지).
     const frameWrap = document.querySelector('.viewer-frame-wrap');
     window.scrollTo(0, 0);
     if (frameWrap) frameWrap.scrollTop = 0;
@@ -1488,7 +1009,6 @@
     setTimeout(() => {
       window.scrollTo(0, 0);
       if (frameWrap) frameWrap.scrollTop = 0;
-      if (data.report_content) markScrollableTables(contentEl);
     }, 300);
   }
 
@@ -1518,9 +1038,6 @@
   }
   document.addEventListener('fullscreenchange', updateFullscreenBtnLabel);
   document.addEventListener('webkitfullscreenchange', updateFullscreenBtnLabel);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeStatuteModal();
-  });
 
   // ===== 관리자 우회: ?report_id=7K4M&admin=관리자코드 로 접속하면 자동 진입 =====
   if (prefilledId && adminCodeParam) {
@@ -1672,13 +1189,6 @@
   });
 </script>
 
-  <div class="statute-modal-backdrop" id="statuteModal" onclick="if(event.target===this) closeStatuteModal()">
-    <div class="statute-modal-box">
-      <div class="statute-modal-title" id="statuteModalTitle"></div>
-      <div class="statute-modal-body" id="statuteModalBody"></div>
-      <a class="statute-modal-link" id="statuteModalLink" target="_blank" rel="noopener">국가법령정보센터에서 전문 보기 ↗</a>
-    </div>
-  </div>
 </body>
 </html>
 
