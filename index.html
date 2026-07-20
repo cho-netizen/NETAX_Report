@@ -466,6 +466,32 @@
 
   /* 금액 열 정렬: 추후 별도 지시에 따라 적용 */
 
+  /* 붙임 발췌 이미지(그림1~3 등) — 컨테이너 폭에 맞춰 반응형으로 축소·중앙정렬.
+     기존에 이 규칙이 없어 이미지가 원본 픽셀 크기 그대로 좌측에 작게 표시되던 문제 수정 */
+  .md-content img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 4px auto 6px;
+    border: 1px solid #E4E0D8;
+    border-radius: 4px;
+  }
+
+  /* 그림/표 캡션 및 단위 표기 — 본문과 구분되는 보조 텍스트 스타일 */
+  .md-content .caption {
+    text-align: center;
+    font-size: 13px;
+    color: #8A7B5C;
+    margin: 18px 0 6px;
+    font-weight: 600;
+  }
+  .md-content .unit-note {
+    text-align: right;
+    font-size: 12.5px;
+    color: #8A8A8A;
+    margin: 0 0 4px;
+  }
+
   /* ===== KaTeX 수식 — 모바일 화면 너비 초과 시 가로 스크롤 처리 ===== */
   .md-content .katex-display {
     overflow-x: auto;
