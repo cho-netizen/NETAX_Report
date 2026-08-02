@@ -221,10 +221,10 @@
     }
   }
 
-  /* 2026.08: 인쇄 허용(.protected가 없는) 상태에서 뷰어 박스가 화면 높이로 잘려
-     "보이는 1페이지만" 인쇄되는 문제 수정. 인쇄 시에만 뷰어/래퍼의 고정 높이·overflow를
-     해제해 전체 콘텐츠가 펼쳐지도록 한다. iframe(report_html 경로) 자체 높이는
-     스크립트의 beforeprint 핸들러가 실제 콘텐츠 높이로 맞춰준다. */
+  /* 2026.08: "인쇄" 버튼(새 창에서 최상위 문서로 열어 인쇄)이 정식 경로다.
+     아래는 혹시 사용자가 버튼 대신 Ctrl+P/우클릭 인쇄를 직접 시도하는 경우를 위한
+     최소한의 폴백일 뿐 — iframe 자체는 브라우저 특성상 여러 페이지로 나눠 인쇄되지
+     않을 수 있으므로 이 CSS만으로 완전한 해결을 보장하지 않는다. */
   @media print {
     html, body {
       height: auto !important;
@@ -240,7 +240,8 @@
       border-radius: 0 !important;
     }
     .viewer:not(.protected) .viewer-header,
-    .viewer:not(.protected) #fullscreenBtn {
+    .viewer:not(.protected) #fullscreenBtn,
+    .viewer:not(.protected) #printBtn {
       display: none !important;
     }
     .viewer:not(.protected) .viewer-frame-wrap {
@@ -248,8 +249,7 @@
       height: auto !important;
     }
     .viewer:not(.protected) .viewer-frame-wrap iframe {
-      height: auto !important;
-      min-height: 0 !important;
+      width: 100% !important;
     }
     .viewer:not(.protected) .md-content {
       overflow: visible !important;
@@ -285,7 +285,8 @@
     gap: 12px;
   }
 
-  #fullscreenBtn {
+  #fullscreenBtn,
+  #printBtn {
     width: auto;
     padding: 6px 12px;
     margin-top: 0;
@@ -295,7 +296,11 @@
     font-weight: 500;
   }
 
-  #fullscreenBtn:hover { background: rgba(255,255,255,0.18); }
+  #fullscreenBtn:hover,
+  #printBtn:hover { background: rgba(255,255,255,0.18); }
+
+  /* 인쇄 차단(권한=차단) 상태에서는 인쇄 버튼 자체를 숨긴다 */
+  .viewer.protected #printBtn { display: none; }
 
   /* 폰 화면: 헤더에서 인사말만 숨기고, 로고와 버튼은 유지 */
   @media (max-width: 480px), (max-height: 500px) {
@@ -309,12 +314,14 @@
     .expiry-logo {
       height: 14px;
     }
-    #fullscreenBtn {
+    #fullscreenBtn,
+    #printBtn {
       padding: 3px 10px;
       font-size: 16px;
       line-height: 1.2;
     }
-    #fullscreenBtn .btn-label {
+    #fullscreenBtn .btn-label,
+    #printBtn .btn-label {
       display: none;
     }
     .viewer-header-right {
@@ -323,7 +330,8 @@
       justify-content: space-between;
     }
 
-    #fullscreenBtn {
+    #fullscreenBtn,
+    #printBtn {
       background: rgba(255,255,255,0.16);
       border: 1px solid rgba(255,255,255,0.22);
     }
@@ -932,6 +940,7 @@
       <div class="greeting"><span id="customerName"></span> 고객님, 자문용역보고서</div>
       <div class="viewer-header-right">
         <img src="netax-wordmark.png" alt="NETAX" class="expiry-logo">
+        <button type="button" id="printBtn" title="인쇄">🖨 <span class="btn-label">인쇄</span></button>
         <button type="button" id="fullscreenBtn" title="전체화면으로 보기">⤢ <span class="btn-label">전체화면</span></button>
       </div>
     </div>
@@ -1076,28 +1085,41 @@
   document.addEventListener('webkitfullscreenchange', updateFullscreenBtnLabel);
 
   // 2026.08: 인쇄 시 "보이는 1페이지만 찍히는" 문제 수정.
-  // report_html 경로는 실제 내용이 iframe(#materialFrame) 안에 srcdoc으로 들어있고,
-  // 이 iframe은 평소 height:100%(부모 박스 크기)로 그려진다. CSS의 overflow:visible만으로는
-  // iframe 자체의 박스 높이가 커지지 않으므로, 인쇄 직전에 iframe 내부 문서의 실제 높이를
-  // 재서 강제로 적용한다. 평소 화면 열람(박스 안 스크롤) UX에는 영향 없음 — 인쇄 시에만 동작.
-  window.addEventListener('beforeprint', () => {
+  // 원인: 브라우저는 iframe(중첩 문서) 내부 콘텐츠를 인쇄할 때, CSS로 overflow/height를
+  // 아무리 풀어줘도 여러 페이지로 나눠 찍지 않고 그 순간의 뷰포트 하나만 인쇄하는 경향이 있다.
+  // (등록한 html 원본 파일을 직접 열어 인쇄하면 정상 — 즉 "최상위 문서로" 인쇄해야 정상 동작함)
+  // 그래서 iframe 안에서 CSS/높이 트릭으로 고치는 대신, "인쇄" 버튼을 눌렀을 때
+  // 콘텐츠를 새 탭(최상위 문서)으로 그대로 열어서 그 탭에서 인쇄하도록 한다.
+  document.getElementById('printBtn').addEventListener('click', () => {
+    if (document.getElementById('viewer').classList.contains('protected')) return;
+
     const frame = document.getElementById('materialFrame');
-    if (frame && frame.style.display !== 'none') {
-      try {
-        const frameDoc = frame.contentDocument || frame.contentWindow.document;
-        const fullHeight = Math.max(
-          frameDoc.documentElement.scrollHeight,
-          frameDoc.body ? frameDoc.body.scrollHeight : 0
-        );
-        frame.style.height = fullHeight + 'px';
-      } catch (e) {
-        // srcdoc은 동일 출처라 보통 접근 가능하지만, 만약 실패해도 인쇄 자체는 진행되도록 무시
+    const contentEl = document.getElementById('materialContent');
+
+    if (frame && frame.style.display !== 'none' && frame.srcdoc) {
+      // report_html 경로: srcdoc 내용을 새 창에 그대로 써서 최상위 문서로 인쇄
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('팝업이 차단되어 인쇄 창을 열 수 없습니다. 브라우저의 팝업 차단을 해제한 후 다시 시도해주세요.');
+        return;
       }
+      printWindow.document.open();
+      printWindow.document.write(frame.srcdoc);
+      printWindow.document.close();
+      printWindow.addEventListener('load', () => {
+        printWindow.focus();
+        printWindow.print();
+      });
+    } else if (frame && frame.style.display !== 'none' && frame.src) {
+      // material_link(구글드라이브 등 외부 링크) 경로: 새 탭에서 원본을 직접 열어
+      // 그 탭에서 인쇄하도록 안내 (교차 출처라 이 페이지에서 직접 제어 불가)
+      window.open(frame.src, '_blank');
+    } else if (contentEl && contentEl.style.display !== 'none') {
+      // report_content(레거시 텍스트) 경로: 현재 페이지 그대로 인쇄해도 무방
+      window.print();
+    } else {
+      window.print();
     }
-  });
-  window.addEventListener('afterprint', () => {
-    const frame = document.getElementById('materialFrame');
-    if (frame) frame.style.height = '';
   });
 
   // ===== 관리자 우회: ?report_id=7K4M&admin=관리자코드 로 접속하면 자동 진입 =====
