@@ -221,6 +221,42 @@
     }
   }
 
+  /* 2026.08: 인쇄 허용(.protected가 없는) 상태에서 뷰어 박스가 화면 높이로 잘려
+     "보이는 1페이지만" 인쇄되는 문제 수정. 인쇄 시에만 뷰어/래퍼의 고정 높이·overflow를
+     해제해 전체 콘텐츠가 펼쳐지도록 한다. iframe(report_html 경로) 자체 높이는
+     스크립트의 beforeprint 핸들러가 실제 콘텐츠 높이로 맞춰준다. */
+  @media print {
+    html, body {
+      height: auto !important;
+      overflow: visible !important;
+    }
+    .viewer:not(.protected) {
+      display: block !important;
+      width: 100% !important;
+      max-width: none !important;
+      height: auto !important;
+      max-height: none !important;
+      overflow: visible !important;
+      border-radius: 0 !important;
+    }
+    .viewer:not(.protected) .viewer-header,
+    .viewer:not(.protected) #fullscreenBtn {
+      display: none !important;
+    }
+    .viewer:not(.protected) .viewer-frame-wrap {
+      overflow: visible !important;
+      height: auto !important;
+    }
+    .viewer:not(.protected) .viewer-frame-wrap iframe {
+      height: auto !important;
+      min-height: 0 !important;
+    }
+    .viewer:not(.protected) .md-content {
+      overflow: visible !important;
+      max-height: none !important;
+    }
+  }
+
   .viewer-header {
     background: var(--navy);
     padding: 18px 24px;
@@ -1038,6 +1074,31 @@
   }
   document.addEventListener('fullscreenchange', updateFullscreenBtnLabel);
   document.addEventListener('webkitfullscreenchange', updateFullscreenBtnLabel);
+
+  // 2026.08: 인쇄 시 "보이는 1페이지만 찍히는" 문제 수정.
+  // report_html 경로는 실제 내용이 iframe(#materialFrame) 안에 srcdoc으로 들어있고,
+  // 이 iframe은 평소 height:100%(부모 박스 크기)로 그려진다. CSS의 overflow:visible만으로는
+  // iframe 자체의 박스 높이가 커지지 않으므로, 인쇄 직전에 iframe 내부 문서의 실제 높이를
+  // 재서 강제로 적용한다. 평소 화면 열람(박스 안 스크롤) UX에는 영향 없음 — 인쇄 시에만 동작.
+  window.addEventListener('beforeprint', () => {
+    const frame = document.getElementById('materialFrame');
+    if (frame && frame.style.display !== 'none') {
+      try {
+        const frameDoc = frame.contentDocument || frame.contentWindow.document;
+        const fullHeight = Math.max(
+          frameDoc.documentElement.scrollHeight,
+          frameDoc.body ? frameDoc.body.scrollHeight : 0
+        );
+        frame.style.height = fullHeight + 'px';
+      } catch (e) {
+        // srcdoc은 동일 출처라 보통 접근 가능하지만, 만약 실패해도 인쇄 자체는 진행되도록 무시
+      }
+    }
+  });
+  window.addEventListener('afterprint', () => {
+    const frame = document.getElementById('materialFrame');
+    if (frame) frame.style.height = '';
+  });
 
   // ===== 관리자 우회: ?report_id=7K4M&admin=관리자코드 로 접속하면 자동 진입 =====
   if (prefilledId && adminCodeParam) {
